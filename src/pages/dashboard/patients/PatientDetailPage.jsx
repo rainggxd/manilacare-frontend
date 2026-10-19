@@ -4,6 +4,9 @@ import { ChevronLeft } from "lucide-react";
 import axios from "axios";
 import { healthCenterName } from "../../../utils/healthCenters";
 import FaceEnrollmentCard from "../../../components/FaceEnrollmentCard";
+import MedicalBackgroundCard from "../../../components/MedicalBackgroundCard";
+import CheckupHistoryCard from "../../../components/CheckupHistoryCard";
+import PatientPhoto from "../../../components/PatientPhoto";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -77,9 +80,18 @@ export default function PatientDetailPage() {
 
       {!isLoading && !loadError && patient && (
         <div className="max-w-6xl space-y-5">
-          <h2 className="text-3xl font-bold text-[#1B5E20]" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {patient.full_name}
-          </h2>
+          <div className="flex items-center gap-5 flex-wrap">
+            <PatientPhoto
+              patient={patient}
+              auth={auth}
+              size={112}
+              editable
+              onUpdated={(photo) => setPatient((prev) => ({ ...prev, photo }))}
+            />
+            <h2 className="text-3xl font-bold text-[#1B5E20]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {patient.full_name}
+            </h2>
+          </div>
 
           <FaceEnrollmentCard patient={patient} auth={auth} canRemove />
 
@@ -111,6 +123,13 @@ export default function PatientDetailPage() {
             <InfoField label="Height (cm)" value={patient.height_cm} />
             <InfoField label="Weight (kg)" value={patient.weight_kg} />
           </Section>
+
+          <MedicalBackgroundCard
+            patient={patient}
+            auth={auth}
+            onSaved={(changes) => setPatient((prev) => ({ ...prev, ...changes }))}
+          />
+          <CheckupHistoryCard patientId={patient.id} auth={auth} />
 
           <Section title="PhilHealth Information">
             <InfoField label="Status" value={patient.philhealth_status} />

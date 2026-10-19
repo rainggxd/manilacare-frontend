@@ -15,8 +15,8 @@ export default function FaceRegistrationField({ descriptor, consent, error, onCo
   const [retaking, setRetaking] = useState(false);
   const captured = Boolean(descriptor) && !retaking;
 
-  async function handleCaptured(d) {
-    onCaptured(d);
+  async function handleCaptured(d, photo) {
+    onCaptured(d, photo);
     setRetaking(false);
   }
 

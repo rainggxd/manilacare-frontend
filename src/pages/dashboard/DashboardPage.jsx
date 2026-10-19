@@ -4,6 +4,8 @@ import { Users, Stethoscope, CalendarCheck, QrCode } from "lucide-react";
 import axios from "axios";
 import OutbreakAlert from "../../components/OutbreakAlert";
 import { healthCenterName } from "../../utils/healthCenters";
+import AppointmentCalendar from "../../components/AppointmentCalendar";
+import { localISO, toLocalISO } from "../../utils/dates";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -81,8 +83,9 @@ const STATUS_COLORS = {
   Completed: "#0B3D7A",
 };
 
-function monthLabel(monthIndex) {
-  return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][monthIndex];
+// "Mon 10/19" style label for the daily chart
+function dayLabel(date) {
+  return date.toLocaleDateString("en-US", { weekday: "short", month: "numeric", day: "numeric" });
 }
 
 export default function DashboardPage() {
@@ -131,7 +134,7 @@ export default function DashboardPage() {
   const stats = useMemo(() => {
     const total = patients.length;
     const todayStr = new Date().toDateString();
-    const todayISO = new Date().toISOString().slice(0, 10);
+    const todayISO = localISO();
 
     const availableDoctors = users.filter((u) => u.role_name === "Doctor" && Number(u.is_active) === 1).length;
 
@@ -152,21 +155,17 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [patients]);
 
-  // Monthly appointments — last 6 months, counted by appointment_date
-  const monthlyAppointmentBars = useMemo(() => {
+  // Daily appointments: last 7 days including today, counted by appointment_date
+  const dailyAppointmentBars = useMemo(() => {
     const now = new Date();
-    const months = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({ year: d.getFullYear(), month: d.getMonth() });
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      days.push(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
     }
-    return months.map(({ year, month }) => {
-      const count = appointments.filter((a) => {
-        if (!a.appointment_date) return false;
-        const d = new Date(a.appointment_date);
-        return d.getFullYear() === year && d.getMonth() === month;
-      }).length;
-      return { label: monthLabel(month), value: count, color: "#0B3D7A" };
+    return days.map((day) => {
+      const iso = localISO(day);
+      const count = appointments.filter((a) => toLocalISO(a.appointment_date) === iso).length;
+      return { label: dayLabel(day), value: count, color: "#0B3D7A" };
     });
   }, [appointments]);
 
@@ -204,12 +203,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
         <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
           <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Monthly Appointments
+            Daily Appointments (Last 7 Days)
           </h3>
           {isLoading ? (
             <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
           ) : (
-            <BarChart bars={monthlyAppointmentBars} />
+            <BarChart bars={dailyAppointmentBars} />
           )}
         </div>
 
@@ -223,6 +222,13 @@ export default function DashboardPage() {
             <BarChart bars={appointmentStatusBars} />
           )}
         </div>
+      </div>
+
+      <h3 className="text-xl font-bold text-[#000000] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+        Appointment Calendar
+      </h3>
+      <div className="mb-8">
+        <AppointmentCalendar appointments={appointments} isLoading={isLoading} />
       </div>
 
       <div className="flex items-center justify-between mb-3">

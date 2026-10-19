@@ -4,6 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { healthCenterName } from "../../utils/healthCenters";
 import FaceEnrollmentCard from "../../components/FaceEnrollmentCard";
+import MedicalBackgroundCard from "../../components/MedicalBackgroundCard";
+import CheckupHistoryCard from "../../components/CheckupHistoryCard";
+import PatientPhoto from "../../components/PatientPhoto";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -139,12 +142,23 @@ export default function StaffPatientDetailPage() {
 
       {!isLoading && !loadError && patient && (
         <>
-          <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {patient.full_name}
-          </h2>
-          <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
-            Family No. {show(patient.family_number)} · {healthCenterName(patient.health_center_id)}
-          </p>
+          <div className="flex items-center gap-5 flex-wrap mb-6">
+            <PatientPhoto
+              patient={patient}
+              auth={auth}
+              size={112}
+              editable
+              onUpdated={(photo) => setPatient((prev) => ({ ...prev, photo }))}
+            />
+            <div>
+              <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                {patient.full_name}
+              </h2>
+              <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                Family No. {show(patient.family_number)} · {healthCenterName(patient.health_center_id)}
+              </p>
+            </div>
+          </div>
 
           <div className="mb-6">
             <FaceEnrollmentCard patient={patient} auth={auth} />
@@ -187,7 +201,16 @@ export default function StaffPatientDetailPage() {
             </Card>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+          <div className="mt-6">
+            <MedicalBackgroundCard
+              patient={patient}
+              auth={auth}
+              onSaved={(changes) => setPatient((prev) => ({ ...prev, ...changes }))}
+            />
+            <CheckupHistoryCard patientId={patient.id} auth={auth} />
+          </div>
+
+          <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
             <h3 className="text-lg font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
               Immunization History
             </h3>

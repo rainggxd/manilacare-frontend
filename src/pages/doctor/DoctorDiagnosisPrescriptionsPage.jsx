@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Stethoscope, Pill, Pencil, Check, X, ChevronDown } from "lucide-react";
+import { Stethoscope, Pill, Pencil, Check, X, ChevronDown, Printer } from "lucide-react";
 import axios from "axios";
+import { printPrescription } from "../../utils/printPrescription";
+import { localISO, toLocalISO } from "../../utils/dates";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -17,7 +19,7 @@ const emptyRxForm = {
   frequency: "",
   duration: "",
   instructions: "",
-  date_prescribed: new Date().toISOString().slice(0, 10),
+  date_prescribed: localISO(),
 };
 
 function PatientPicker({ patients, value, onChange }) {
@@ -183,6 +185,18 @@ export default function DoctorDiagnosisPrescriptionsPage() {
     }
   }
 
+  // Prints every prescription that has the same date as the newest one,
+  // so all the medicines from one consultation go on one slip.
+  function handlePrintLatest() {
+    if (prescriptions.length === 0) return;
+    const newest = [...prescriptions]
+      .map((rx) => toLocalISO(rx.date_prescribed))
+      .sort()
+      .pop();
+    const sameDay = prescriptions.filter((rx) => toLocalISO(rx.date_prescribed) === newest);
+    printPrescription({ patient: patientDetail, prescriptions: sameDay, doctorName: user?.full_name });
+  }
+
   const sortedPatients = useMemo(
     () => [...patients].sort((a, b) => a.full_name.localeCompare(b.full_name)),
     [patients]
@@ -301,14 +315,28 @@ export default function DoctorDiagnosisPrescriptionsPage() {
                   Prescriptions
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowRxForm((v) => !v)}
-                className="rounded-full bg-[#0B3D7A] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#092E5C] transition-colors"
-                style={{ fontFamily: "'Lora', serif" }}
-              >
-                {showRxForm ? "Cancel" : "+ New Prescription"}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                {prescriptions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handlePrintLatest}
+                    className="inline-flex items-center gap-2 rounded-full bg-white border border-[#0B3D7A]/30 text-[#0B3D7A] px-5 py-2.5 text-sm font-semibold hover:bg-[#0B3D7A]/5 transition-colors"
+                    style={{ fontFamily: "'Lora', serif" }}
+                    title="Print all prescriptions from the latest date"
+                  >
+                    <Printer size={16} />
+                    Print Latest
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowRxForm((v) => !v)}
+                  className="rounded-full bg-[#0B3D7A] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#092E5C] transition-colors"
+                  style={{ fontFamily: "'Lora', serif" }}
+                >
+                  {showRxForm ? "Cancel" : "+ New Prescription"}
+                </button>
+              </div>
             </div>
 
             {showRxForm && (
@@ -425,6 +453,17 @@ export default function DoctorDiagnosisPrescriptionsPage() {
                         <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
                           Dr. {rx.doctor_name || "—"}
                         </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            printPrescription({ patient: patientDetail, prescriptions: [rx], doctorName: rx.doctor_name || user?.full_name })
+                          }
+                          className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#0B3D7A]/30 px-3 py-1 text-xs font-semibold text-[#0B3D7A] hover:bg-[#0B3D7A]/5"
+                          style={{ fontFamily: "'Lora', serif" }}
+                        >
+                          <Printer size={13} />
+                          Print
+                        </button>
                       </div>
                     </div>
                   </div>

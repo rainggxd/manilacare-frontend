@@ -20,6 +20,7 @@ import HealthCentersPage from "./pages/dashboard/HealthCentersPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import ActivityLogsPage from "./pages/dashboard/ActivityLogsPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import LandingPage from "./pages/public/LandingPage";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboardPage from "./pages/doctor/DoctorDashboardPage";
 import DoctorPatientRecordsPage from "./pages/doctor/DoctorPatientRecordsPage";
@@ -121,6 +122,8 @@ function App() {
             )
           }
         />
+        {/* Public landing page (Kalinga, Mission and Vision) */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/terms" element={<TermsAndConditionsPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -203,7 +206,7 @@ function App() {
           <Route path="prescriptions" element={<MyPrescriptionsPage />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

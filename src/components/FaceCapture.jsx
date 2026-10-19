@@ -1,3 +1,4 @@
+import { grabPhoto } from "../utils/photo";
 import { useEffect, useRef, useState } from "react";
 import { Camera } from "lucide-react";
 import { captureDescriptor, checkFrame, FRAME_HINTS, loadFaceModels } from "../utils/faceApi";
@@ -5,7 +6,8 @@ import { captureDescriptor, checkFrame, FRAME_HINTS, loadFaceModels } from "../u
 /**
  * Camera preview with a capture button.
  * When the button is pressed it reads the face and calls
- * onCaptured(descriptor), where descriptor is an array of 128 numbers.
+ * onCaptured(descriptor, photo), where descriptor is an array of 128 numbers
+ * and photo is a small JPEG of the same moment (used as the patient photo).
  *
  * Props:
  *   onCaptured  - async function(descriptor)
@@ -111,7 +113,8 @@ export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Ca
     setCaptureError("");
     try {
       const descriptor = await captureDescriptor(videoRef.current, samples);
-      await onCaptured(descriptor);
+      const photo = grabPhoto(videoRef.current);
+      await onCaptured(descriptor, photo);
     } catch (err) {
       setCaptureError(err?.message || "Could not read the face. Please try again.");
     } finally {

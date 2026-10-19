@@ -30,6 +30,9 @@ const initialForm = {
   fourps_no: "",
   religion: "",
   educational_attainment: "",
+  occupation: "",
+  family_history: "",
+  allergies: "",
   philhealth_status: "",
   philhealth_no: "",
   philhealth_member_name: "",
@@ -77,6 +80,7 @@ const initialForm = {
   td_4: "",
   td_5: "",
   face_descriptor: null,
+  photo: null,
   face_consent: false,
   terms_agreed: false,
 };
@@ -324,6 +328,9 @@ export default function RegisterPage() {
         fourps_no: form.fourps_no,
         religion: form.religion,
         educational_attainment: form.educational_attainment,
+        occupation: form.occupation || null,
+        family_history: form.family_history || null,
+        allergies: form.allergies || null,
         philhealth_status: form.philhealth_status,
         philhealth_no: form.philhealth_no,
         philhealth_member_name: form.philhealth_member_name,
@@ -331,6 +338,7 @@ export default function RegisterPage() {
         immunization_records,
         face_descriptor: faceRequired ? form.face_descriptor : null,
         face_consent: faceRequired ? form.face_consent : false,
+        photo: faceRequired ? form.photo : null,
       };
 
       if (showObHistory) {
@@ -594,6 +602,10 @@ export default function RegisterPage() {
             <PillInput placeholder="WEIGHT (kg)" value={form.weight_kg} onChange={handleChange("weight_kg")} numericOnly />
             <PillInput placeholder="EDUCATIONAL ATTAINMENT" value={form.educational_attainment} onChange={handleChange("educational_attainment")} />
             <PillInput type="date" placeholder="MEMBER DATE OF BIRTH" value={form.philhealth_member_dob} onChange={handleChange("philhealth_member_dob")} />
+
+            <PillInput placeholder="OCCUPATION" value={form.occupation} onChange={handleChange("occupation")} />
+            <PillInput placeholder="FAMILY HISTORY (e.g. Hypertension)" value={form.family_history} onChange={handleChange("family_history")} />
+            <PillInput placeholder="ALLERGIES (if any)" value={form.allergies} onChange={handleChange("allergies")} />
           </div>
 
           <div className="flex justify-center gap-4 mt-10">
@@ -628,8 +640,8 @@ export default function RegisterPage() {
                 consent={form.face_consent}
                 error={errors.face}
                 onConsent={(v) => setForm((prev) => ({ ...prev, face_consent: v, face_descriptor: v ? prev.face_descriptor : null }))}
-                onCaptured={(d) => setForm((prev) => ({ ...prev, face_descriptor: d }))}
-                onClear={() => setForm((prev) => ({ ...prev, face_descriptor: null }))}
+                onCaptured={(d, photo) => setForm((prev) => ({ ...prev, face_descriptor: d, photo: photo || prev.photo }))}
+                onClear={() => setForm((prev) => ({ ...prev, face_descriptor: null, photo: null }))}
               />
             )}
             <div className="mt-8 rounded-2xl bg-white/95 border border-[#1B5E20]/20 shadow-sm p-4 sm:p-5">
@@ -749,8 +761,8 @@ export default function RegisterPage() {
               consent={form.face_consent}
               error={errors.face}
               onConsent={(v) => setForm((prev) => ({ ...prev, face_consent: v, face_descriptor: v ? prev.face_descriptor : null }))}
-              onCaptured={(d) => setForm((prev) => ({ ...prev, face_descriptor: d }))}
-              onClear={() => setForm((prev) => ({ ...prev, face_descriptor: null }))}
+              onCaptured={(d, photo) => setForm((prev) => ({ ...prev, face_descriptor: d, photo: photo || prev.photo }))}
+              onClear={() => setForm((prev) => ({ ...prev, face_descriptor: null, photo: null }))}
             />
           )}
 

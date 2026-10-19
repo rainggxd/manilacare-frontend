@@ -6,6 +6,7 @@ import axios from "axios";
 import FaceCapture from "../../components/FaceCapture";
 import FaceEnrollModal from "../../components/FaceEnrollModal";
 import PatientProfileCards from "../../components/PatientProfileCards";
+import PatientPhoto from "../../components/PatientPhoto";
 import { healthCenterName } from "../../utils/healthCenters";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
@@ -348,7 +349,9 @@ export default function ScanQRPage() {
             </p>
           ) : (
             <div>
-              <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4">
+              <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4 flex items-start gap-4">
+                <PatientPhoto patient={patient} size={96} />
+                <div>
                 <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {patient.full_name}
                 </p>
@@ -361,6 +364,7 @@ export default function ScanQRPage() {
                 <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
                   {patient.contact_number || "—"}
                 </p>
+                </div>
               </div>
 
               {faceStatus?.enabled && (

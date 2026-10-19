@@ -3,6 +3,9 @@ import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { ChevronLeft, Syringe } from "lucide-react";
 import axios from "axios";
 import { healthCenterName } from "../../utils/healthCenters";
+import MedicalBackgroundCard from "../../components/MedicalBackgroundCard";
+import CheckupHistoryCard from "../../components/CheckupHistoryCard";
+import PatientPhoto from "../../components/PatientPhoto";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -98,13 +101,16 @@ export default function DoctorPatientDetailPage() {
 
       {/* Patient header card */}
       <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {patient.full_name}
-          </h2>
-          <p className="text-sm text-[#5B6470] mt-1" style={{ fontFamily: "'Lora', serif" }}>
-            {patient.age} yrs · {patient.sex} · {healthCenterName(patient.health_center_id)}
-          </p>
+        <div className="flex items-center gap-4">
+          <PatientPhoto patient={patient} size={88} />
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {patient.full_name}
+            </h2>
+            <p className="text-sm text-[#5B6470] mt-1" style={{ fontFamily: "'Lora', serif" }}>
+              {patient.age} yrs · {patient.sex} · {healthCenterName(patient.health_center_id)}
+            </p>
+          </div>
         </div>
         <div className="flex gap-6 text-sm" style={{ fontFamily: "'Lora', serif" }}>
           <div>
@@ -156,6 +162,14 @@ export default function DoctorPatientDetailPage() {
           <InfoField label="Member DOB" value={formatDate(patient.philhealth_member_dob)} />
         </InfoCard>
       </div>
+
+      {/* Background and Medical History + Check-up History */}
+      <MedicalBackgroundCard
+        patient={patient}
+        auth={auth}
+        onSaved={(changes) => setPatient((prev) => ({ ...prev, ...changes }))}
+      />
+      <CheckupHistoryCard patientId={id} auth={auth} />
 
       {/* Immunization History */}
       {Array.isArray(patient.immunization_records) && patient.immunization_records.length > 0 && (

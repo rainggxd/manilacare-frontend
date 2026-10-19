@@ -4,6 +4,7 @@ import { ScanFace, UserCheck } from "lucide-react";
 import axios from "axios";
 import FaceCapture from "../../components/FaceCapture";
 import PatientProfileCards from "../../components/PatientProfileCards";
+import PatientPhoto from "../../components/PatientPhoto";
 import { healthCenterName } from "../../utils/healthCenters";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
@@ -149,16 +150,19 @@ export default function ScanPatientPage() {
 
           {(step === "suggested" || step === "confirmed") && suggested && (
             <div>
-              <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4">
-                <p className="text-xs uppercase tracking-wide text-[#8A8578] mb-1" style={{ fontFamily: "'Lora', serif" }}>
-                  {step === "suggested" ? "Possible match" : "Confirmed patient"}
-                </p>
-                <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  {suggested.full_name}
-                </p>
-                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
-                  Family No. {suggested.family_number || "—"}
-                </p>
+              <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4 flex items-start gap-4">
+                <PatientPhoto patient={{ ...suggested, photo: suggested.photo || profile?.photo }} size={96} />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-[#8A8578] mb-1" style={{ fontFamily: "'Lora', serif" }}>
+                    {step === "suggested" ? "Possible match" : "Confirmed patient"}
+                  </p>
+                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    {suggested.full_name}
+                  </p>
+                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                    Family No. {suggested.family_number || "—"}
+                  </p>
+                </div>
               </div>
 
               {step === "suggested" && (

@@ -47,7 +47,11 @@ export default function UserManagementPage() {
       ]);
       setUsers(usersRes.data?.data ?? []);
       setDeletedUsers(deletedRes.data?.data ?? []);
-      setRoles((rolesRes.data?.data ?? []).filter((r) => r.role_name !== "Patient"));
+      // Patient accounts come from Patient Registration, and no one may
+      // create another Master Admin from this page.
+      setRoles(
+        (rolesRes.data?.data ?? []).filter((r) => r.role_name !== "Patient" && r.role_name !== "Master Admin")
+      );
     } catch (err) {
       setLoadError("Unable to load user accounts right now.");
     } finally {
@@ -82,8 +86,7 @@ export default function UserManagementPage() {
       setFormError(pwError);
       return;
     }
-    const selectedRole = roles.find((r) => String(r.id) === String(formData.role_id));
-    if (!isCenterAdmin && selectedRole?.role_name !== "Master Admin" && !formData.health_center_id) {
+    if (!isCenterAdmin && !formData.health_center_id) {
       setFormError("Please select a health center for this account.");
       return;
     }
@@ -146,7 +149,7 @@ export default function UserManagementPage() {
             User Management
           </h2>
           <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
-            Create and manage Staff and Doctor accounts
+            {isCenterAdmin ? "Create and manage Staff and Doctor accounts" : "Create and manage Admin, Staff and Doctor accounts"}
           </p>
         </div>
         <div className="flex items-center gap-3">

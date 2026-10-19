@@ -1,3 +1,4 @@
+import PatientPhoto from "./PatientPhoto";
 // Read-only patient profile (basic info, contact, family, PhilHealth,
 // immunizations, OB history). Used on the Scan QR page so staff can see
 // the full record right after a scan.
@@ -72,6 +73,24 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
 
   return (
     <div>
+      {/* Photo first, so the staff can compare it with the person in front of them */}
+      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6 flex items-center gap-5 flex-wrap">
+        <PatientPhoto patient={patient} size={140} />
+        <div>
+          <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {show(patient.full_name)}
+          </p>
+          <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+            {show(patient.age)} yrs · {show(patient.sex)}
+          </p>
+          {!patient.photo && (
+            <p className="text-xs text-[#8A8578] mt-1" style={{ fontFamily: "'Lora', serif" }}>
+              No photo yet. A photo can be taken from the patient&apos;s record.
+            </p>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Basic Information">
           <Field label="Full Name" value={show(patient.full_name)} />
@@ -82,6 +101,7 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
           <Field label="Place of Birth" value={show(patient.place_of_birth)} />
           <Field label="Religion" value={show(patient.religion)} />
           <Field label="Educational Attainment" value={show(patient.educational_attainment)} />
+          <Field label="Occupation" value={show(patient.occupation)} />
           <Field label="Height (cm)" value={show(patient.height_cm)} />
           <Field label="Weight (kg)" value={show(patient.weight_kg)} />
         </Card>
@@ -97,6 +117,8 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
         <Card title="Family Background">
           <Field label="Father's Name" value={show(patient.fathers_name)} />
           <Field label="Mother's Name" value={show(patient.mothers_name)} />
+          <Field label="Family History" value={show(patient.family_history)} />
+          <Field label="Allergies" value={show(patient.allergies)} />
         </Card>
 
         <Card title="PhilHealth and IDs">

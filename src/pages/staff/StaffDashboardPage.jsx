@@ -3,11 +3,14 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { CalendarClock, UserCheck, Users, PhoneCall, Loader2 } from "lucide-react";
 import axios from "axios";
 import OutbreakAlert from "../../components/OutbreakAlert";
+import AppointmentCalendar from "../../components/AppointmentCalendar";
+import { localISO, toLocalISO } from "../../utils/dates";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
+// Today's date in Philippine time (see utils/dates.js)
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  return localISO();
 }
 
 function StatCard({ icon: Icon, label, value }) {
@@ -62,7 +65,7 @@ export default function StaffDashboardPage() {
   }, [auth?.token]);
 
   const todaysAppointments = useMemo(
-    () => appointments.filter((a) => a.appointment_date === todayISO() && a.status !== "Rejected"),
+    () => appointments.filter((a) => toLocalISO(a.appointment_date) === todayISO() && a.status !== "Rejected"),
     [appointments]
   );
 
@@ -176,39 +179,20 @@ export default function StaffDashboardPage() {
         )}
       </div>
 
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Today's Appointments
-          </h3>
-          <button
-            type="button"
-            onClick={() => navigate("/staff/check-in")}
-            className="rounded-full bg-[#0B3D7A] text-white px-5 py-2 text-sm font-semibold hover:bg-[#0A3468] transition-colors"
-            style={{ fontFamily: "'Lora', serif" }}
-          >
-            Go to Check-In
-          </button>
-        </div>
-        {isLoading ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
-        ) : todaysAppointments.length === 0 ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>No appointments booked for today.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {todaysAppointments.map((a) => (
-              <div
-                key={a.id}
-                className="flex items-center justify-between rounded-xl border border-[#0B3D7A]/10 px-4 py-3"
-                style={{ fontFamily: "'Lora', serif" }}
-              >
-                <span className="font-semibold text-[#1A1A1A]">{a.patient_name}</span>
-                <span className="text-sm text-[#8A8578]">{a.appointment_time}</span>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <h3 className="text-xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Appointment Calendar
+        </h3>
+        <button
+          type="button"
+          onClick={() => navigate("/staff/check-in")}
+          className="rounded-full bg-[#0B3D7A] text-white px-5 py-2 text-sm font-semibold hover:bg-[#0A3468] transition-colors"
+          style={{ fontFamily: "'Lora', serif" }}
+        >
+          Go to Check-In
+        </button>
       </div>
+      <AppointmentCalendar appointments={appointments} isLoading={isLoading} />
     </div>
   );
 }

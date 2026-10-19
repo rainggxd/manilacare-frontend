@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Users, CalendarCheck, Clock, CheckCircle2, UserPlus, QrCode } from "lucide-react";
+import { Users, CalendarCheck, Clock, CheckCircle2, UserPlus, CalendarDays } from "lucide-react";
 import axios from "axios";
 import { HEALTH_CENTERS } from "../../utils/healthCenters";
+import { localISO, toLocalISO, formatLongDate } from "../../utils/dates";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -50,6 +51,8 @@ export default function ReportsPage() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  // The day being reported. Defaults to today; the Admin can pick another day.
+  const [reportDate, setReportDate] = useState(localISO());
 
   useEffect(() => {
     let cancelled = false;
@@ -110,37 +113,35 @@ export default function ReportsPage() {
     return { totalPatients, totalAppointments, pending, approved, rejected, completed, byCenter, bySex };
   }, [patients, appointments, auth?.user?.role, auth?.user?.health_center_id]);
 
-  const monthlyStats = useMemo(() => {
-    const now = new Date();
-    const isThisMonth = (dateStr) => {
-      if (!dateStr) return false;
-      const d = new Date(dateStr);
-      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  // Daily figures for the selected day
+  const dailyStats = useMemo(() => {
+    const onDay = (value) => toLocalISO(value) === reportDate;
+    const dayAppointments = appointments.filter((a) => onDay(a.appointment_date));
+
+    return {
+      newPatients: patients.filter((p) => onDay(p.created_at)).length,
+      newAccounts: users.filter((u) => onDay(u.created_at)).length,
+      appointments: dayAppointments.length,
+      completed: dayAppointments.filter((a) => a.status === "Completed").length,
     };
+  }, [patients, users, appointments, reportDate]);
 
-    const newPatientsThisMonth = patients.filter((p) => isThisMonth(p.created_at)).length;
-    const newAccountsThisMonth = users.filter((u) => isThisMonth(u.created_at)).length;
-
-    return { newPatientsThisMonth, newAccountsThisMonth };
-  }, [patients, users]);
-
+  // Completed appointments handled by each doctor on the selected day
   const doctorActivity = useMemo(() => {
-    const now = new Date();
     const doctors = users.filter((u) => u.role_name === "Doctor");
 
     return doctors
       .map((doc) => {
-        const count = appointments.filter((a) => {
-          if (String(a.doctor_user_id) !== String(doc.id)) return false;
-          if (a.status !== "Completed") return false;
-          if (!a.appointment_date) return false;
-          const d = new Date(a.appointment_date);
-          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-        }).length;
+        const count = appointments.filter(
+          (a) =>
+            String(a.doctor_user_id) === String(doc.id) &&
+            a.status === "Completed" &&
+            toLocalISO(a.appointment_date) === reportDate
+        ).length;
         return { id: doc.id, name: doc.full_name, count };
       })
       .sort((a, b) => b.count - a.count);
-  }, [users, appointments]);
+  }, [users, appointments, reportDate]);
 
   const maxCenterPatients = Math.max(...stats.byCenter.map((c) => c.patientCount), 1);
   const maxSex = Math.max(stats.bySex.Male, stats.bySex.Female, 1);
@@ -170,13 +171,26 @@ export default function ReportsPage() {
         <StatCard icon={CheckCircle2} label="Approved" value={isLoading ? "…" : stats.approved} />
       </div>
 
-      <h3 className="text-lg font-bold text-[#000000] mt-4 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-        This Month
-      </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <StatCard icon={UserPlus} label="New Patients This Month" value={isLoading ? "…" : monthlyStats.newPatientsThisMonth} />
-        <StatCard icon={Users} label="New Accounts This Month" value={isLoading ? "…" : monthlyStats.newAccountsThisMonth} />
-        <StatCard icon={QrCode} label="QR Code Uses This Month" value="—" />
+      <div className="flex items-center justify-between flex-wrap gap-3 mt-4 mb-3">
+        <h3 className="text-lg font-bold text-[#000000]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Daily Report: {formatLongDate(reportDate)}
+        </h3>
+        <label className="inline-flex items-center gap-2 text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+          <CalendarDays size={16} />
+          <input
+            type="date"
+            value={reportDate}
+            max={localISO()}
+            onChange={(e) => setReportDate(e.target.value || localISO())}
+            className="rounded-full bg-white border border-[#0B3D7A]/20 px-4 py-2 text-sm text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#0B3D7A]/30"
+          />
+        </label>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard icon={UserPlus} label="New Patients" value={isLoading ? "…" : dailyStats.newPatients} />
+        <StatCard icon={CalendarCheck} label="Appointments" value={isLoading ? "…" : dailyStats.appointments} />
+        <StatCard icon={CheckCircle2} label="Completed Appointments" value={isLoading ? "…" : dailyStats.completed} />
+        <StatCard icon={Users} label="New Accounts" value={isLoading ? "…" : dailyStats.newAccounts} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -224,10 +238,10 @@ export default function ReportsPage() {
 
         <div className="rounded-2xl border border-[#0B3D7A]/20 p-6 lg:col-span-2">
           <h3 className="text-lg font-bold text-[#000000] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Doctor's Activity This Month
+            Doctor's Activity: {formatLongDate(reportDate)}
           </h3>
           <p className="text-xs text-[#8A8578] mb-4" style={{ fontFamily: "'Lora', serif" }}>
-            Completed appointments handled by each doctor, current month
+            Completed appointments handled by each doctor on the selected day
           </p>
           {doctorActivity.length === 0 ? (
             <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
