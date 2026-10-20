@@ -21,6 +21,7 @@ import SettingsPage from "./pages/dashboard/SettingsPage";
 import ActivityLogsPage from "./pages/dashboard/ActivityLogsPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import LandingPage from "./pages/public/LandingPage";
+import AnnouncementsPage from "./pages/dashboard/AnnouncementsPage";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboardPage from "./pages/doctor/DoctorDashboardPage";
 import DoctorPatientRecordsPage from "./pages/doctor/DoctorPatientRecordsPage";
@@ -141,6 +142,7 @@ function App() {
             element={auth?.user?.role === "Master Admin" ? <MasterAdminDashboardPage /> : <DashboardPage />}
           />
           <Route path="users" element={<UserManagementPage />} />
+          <Route path="announcements" element={<AnnouncementsPage />} />
 
           {/* Master Admin = whole system, Admin = own center */}
           <Route path="backup-restore" element={<BackupRestorePage />} />

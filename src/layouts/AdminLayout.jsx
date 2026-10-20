@@ -24,6 +24,7 @@ const NAV_SECTIONS = [
       { label: "Patient Records", to: "/dashboard/records", roles: [ADMIN] },
       { label: "QR Code", to: "/dashboard/qr-code", roles: [ADMIN] },
       { label: "Appointments", to: "/dashboard/appointments", roles: [ADMIN] },
+      { label: "Announcements", to: "/dashboard/announcements", roles: [MASTER, ADMIN] },
     ],
   },
   {

@@ -83,7 +83,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
     <div className="min-h-screen w-full bg-white flex flex-col">
       {/* Header */}
       <header className="bg-[#0B3D7A] px-4 sm:px-8 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 sm:gap-3">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3" title="Back to home">
           <img
             src={manilaLogo}
             alt="Lungsod ng Maynila seal"
@@ -95,22 +95,22 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
           >
             ManilaCare
           </span>
-        </div>
+        </Link>
         <nav className="flex items-center gap-4 sm:gap-8">
-          <a
-            href="#about"
+          <Link
+            to="/#about"
             className="text-white/90 hover:text-white text-sm sm:text-lg"
             style={{ fontFamily: "'Lora', serif" }}
           >
             About us
-          </a>
-          <a
-            href="#contact"
+          </Link>
+          <Link
+            to="/#contact"
             className="text-white/90 hover:text-white text-sm sm:text-lg"
             style={{ fontFamily: "'Lora', serif" }}
           >
             Contact Us
-          </a>
+          </Link>
         </nav>
       </header>
 
