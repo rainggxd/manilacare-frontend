@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Search, UserPlus, CheckCircle2 } from "lucide-react";
 import axios from "axios";
+import { formatTime } from "../../utils/dates";
+import { useConfirm } from "../../components/ConfirmDialog";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -25,6 +27,7 @@ function StatusBadge({ status }) {
 }
 
 export default function CheckInPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
@@ -87,6 +90,9 @@ export default function CheckInPage() {
   }, [search, patients]);
 
   async function checkIn(patientId, appointmentId = null) {
+    const p = patients.find((x) => String(x.id) === String(patientId));
+    const ok = await confirm({ title: `Check in ${p?.full_name ?? "this patient"}?`, message: "A queue number will be given for today's visit.", confirmText: "Yes, check in" });
+    if (!ok) return;
     setCheckInError("");
     setCheckInSuccess("");
     setIsCheckingIn(true);
@@ -110,33 +116,33 @@ export default function CheckInPage() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
           Patient Check-In
         </h2>
-        <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
           Check in patients arriving for a booked appointment, or as a walk-in
         </p>
       </div>
 
       {checkInError && (
-        <p className="text-sm text-[#8A3B27] mb-3" style={{ fontFamily: "'Lora', serif" }}>{checkInError}</p>
+        <p className="text-sm text-[#8A3B27] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>{checkInError}</p>
       )}
       {checkInSuccess && (
-        <p className="text-sm text-[#1B5E20] mb-3 flex items-center gap-2" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#1B5E20] mb-3 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
           <CheckCircle2 size={16} /> {checkInSuccess}
         </p>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Today's appointments awaiting check-in */}
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Today's Appointments
           </h3>
           {isLoading ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
           ) : todaysAppointments.length === 0 ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
               No approved appointments left to check in for today.
             </p>
           ) : (
@@ -144,12 +150,12 @@ export default function CheckInPage() {
               {todaysAppointments.map((a) => (
                 <div
                   key={a.id}
-                  className="flex items-center justify-between rounded-xl border border-[#0B3D7A]/10 px-4 py-3"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  className="flex items-center justify-between rounded-xl border border-[#E3E8EF] px-4 py-3"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   <div>
                     <p className="font-semibold text-[#1A1A1A]">{a.patient_name}</p>
-                    <p className="text-xs text-[#8A8578]">{a.appointment_time} · {a.reason || "Consultation"}</p>
+                    <p className="text-xs text-[#8A8578]">{formatTime(a.appointment_time)} · {a.reason || "Consultation"}</p>
                   </div>
                   <button
                     type="button"
@@ -166,11 +172,11 @@ export default function CheckInPage() {
         </div>
 
         {/* Walk-in check-in */}
-        <div className="rounded-2xl bg-[#1B5E20] text-white p-6">
-          <h3 className="text-lg font-bold mb-1 flex items-center gap-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-            <UserPlus size={18} /> Walk-In Check-In
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <UserPlus size={18} className="text-[#0B3D7A]" /> Walk-In Check-In
           </h3>
-          <p className="text-sm text-white/80 mb-4" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#5B6470] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Search a patient who doesn't have a booked appointment today
           </p>
 
@@ -184,15 +190,15 @@ export default function CheckInPage() {
                 setSelectedPatientId("");
               }}
               placeholder="Search patient by name…"
-              className="w-full rounded-full bg-white pl-10 pr-4 py-2.5 text-sm text-[#1A1A1A] outline-none"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="w-full rounded-lg bg-white border border-[#CBD5E1] pl-10 pr-4 py-2.5 text-sm text-[#1A1A1A] outline-none focus:border-[#0B3D7A] focus:ring-2 focus:ring-[#0B3D7A]/20"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
 
           {search.trim() && (
-            <div className="rounded-xl bg-white/10 divide-y divide-white/10 mb-3 max-h-56 overflow-y-auto">
+            <div className="rounded-xl border border-[#E3E8EF] divide-y divide-[#E3E8EF] mb-3 max-h-56 overflow-y-auto">
               {filteredPatients.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-white/70" style={{ fontFamily: "'Lora', serif" }}>
+                <p className="px-4 py-3 text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                   No matching patients.
                 </p>
               ) : (
@@ -201,10 +207,10 @@ export default function CheckInPage() {
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedPatientId(String(p.id))}
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-white/10 transition-colors ${
-                      selectedPatientId === String(p.id) ? "bg-white/20 font-semibold" : ""
+                    className={`w-full text-left px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-[#F4F6F9] transition-colors ${
+                      selectedPatientId === String(p.id) ? "bg-[#0B3D7A]/10 text-[#0B3D7A] font-semibold" : ""
                     }`}
-                    style={{ fontFamily: "'Lora', serif" }}
+                    style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     {p.full_name}
                   </button>
@@ -217,7 +223,7 @@ export default function CheckInPage() {
             type="button"
             disabled={!selectedPatientId || isCheckingIn}
             onClick={() => checkIn(selectedPatientId, null)}
-            className="w-full rounded-full bg-white text-[#1B5E20] px-6 py-2.5 text-sm font-bold hover:bg-white/90 disabled:opacity-50 transition-colors"
+            className="w-full rounded-full bg-[#0B3D7A] text-white px-6 py-2.5 text-sm font-bold hover:bg-[#0A3468] disabled:opacity-50 transition-colors"
           >
             {isCheckingIn ? "Checking in…" : "Check In as Walk-In"}
           </button>
@@ -225,38 +231,38 @@ export default function CheckInPage() {
       </div>
 
       {/* Today's visit log */}
-      <div className="overflow-x-auto rounded-2xl border border-[#0B3D7A]/20">
-        <table className="w-full min-w-[720px] border-collapse text-left" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="overflow-x-auto rounded-2xl border border-[#E3E8EF] bg-white shadow-sm">
+        <table className="w-full min-w-[720px] border-collapse text-left" style={{ fontFamily: "'Inter', sans-serif" }}>
           <thead>
-            <tr className="bg-[#0B3D7A] text-white">
-              <th className="px-4 py-3 font-bold">Patient</th>
-              <th className="px-4 py-3 font-bold">Time</th>
-              <th className="px-4 py-3 font-bold">Purpose</th>
-              <th className="px-4 py-3 font-bold">Status</th>
+            <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
+              <th className="px-4 py-3 font-semibold">Patient</th>
+              <th className="px-4 py-3 font-semibold">Time</th>
+              <th className="px-4 py-3 font-semibold">Purpose</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={4} className="px-4 py-6 text-center">Loading…</td>
               </tr>
             )}
             {!isLoading && loadError && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={4} className="px-4 py-6 text-center">{loadError}</td>
               </tr>
             )}
             {!isLoading && !loadError && todaysVisits.length === 0 && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={4} className="px-4 py-6 text-center">No check-ins yet today.</td>
               </tr>
             )}
             {!isLoading &&
               !loadError &&
               todaysVisits.map((v) => (
-                <tr key={v.id} className="bg-[#1B5E20] text-white border-t border-white/10">
+                <tr key={v.id} className="bg-white text-[#1A1A1A] border-t border-[#E3E8EF]">
                   <td className="px-4 py-3">{v.patient_name}</td>
-                  <td className="px-4 py-3">{v.visit_time}</td>
+                  <td className="px-4 py-3">{formatTime(v.visit_time)}</td>
                   <td className="px-4 py-3">{v.purpose || "—"}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={v.status} />

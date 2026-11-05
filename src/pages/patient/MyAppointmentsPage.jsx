@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { CalendarPlus, X } from "lucide-react";
 import axios from "axios";
+import { formatLongDate, formatTime } from "../../utils/dates";
+import { useConfirm } from "../../components/ConfirmDialog";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -19,6 +21,7 @@ const emptyForm = {
 };
 
 export default function MyAppointmentsPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
@@ -64,6 +67,12 @@ export default function MyAppointmentsPage() {
       setFormError("Date and time are required.");
       return;
     }
+    const ok = await confirm({
+      title: "Send this appointment request?",
+      message: "The health center will review it. You will get an email once it is approved or rejected.",
+      confirmText: "Yes, send request",
+    });
+    if (!ok) return;
     setIsSubmitting(true);
     try {
       await axios.post(
@@ -85,10 +94,10 @@ export default function MyAppointmentsPage() {
     <div>
       <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
-          <h2 className="text-3xl text-[#1B5E20] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
             My Appointments
           </h2>
-          <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
             Request and track your health center visits
           </p>
         </div>
@@ -96,7 +105,7 @@ export default function MyAppointmentsPage() {
           type="button"
           onClick={() => setShowForm((v) => !v)}
           className="inline-flex items-center gap-2 rounded-full bg-[#1B5E20] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#164D1A] transition-colors"
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           {showForm ? <X size={16} /> : <CalendarPlus size={16} />}
           {showForm ? "Cancel" : "Request Appointment"}
@@ -106,7 +115,7 @@ export default function MyAppointmentsPage() {
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4"
+          className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
           <div>
             <label className="block text-xs text-[#5B6470] mb-1">Date</label>
@@ -115,7 +124,7 @@ export default function MyAppointmentsPage() {
               value={form.appointment_date}
               onChange={(e) => setForm((p) => ({ ...p, appointment_date: e.target.value }))}
               className="w-full rounded-full bg-[#F7F5F1] border border-[#0B3D7A]/15 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0B3D7A]/30"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
           <div>
@@ -125,7 +134,7 @@ export default function MyAppointmentsPage() {
               value={form.appointment_time}
               onChange={(e) => setForm((p) => ({ ...p, appointment_time: e.target.value }))}
               className="w-full rounded-full bg-[#F7F5F1] border border-[#0B3D7A]/15 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0B3D7A]/30"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
           <div>
@@ -136,7 +145,7 @@ export default function MyAppointmentsPage() {
               onChange={(e) => setForm((p) => ({ ...p, reason: e.target.value }))}
               placeholder="e.g. Fever, check-up"
               className="w-full rounded-full bg-[#F7F5F1] border border-[#0B3D7A]/15 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0B3D7A]/30"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
 
@@ -147,7 +156,7 @@ export default function MyAppointmentsPage() {
               type="submit"
               disabled={isSubmitting}
               className="rounded-full bg-[#0B3D7A] text-white px-6 py-2.5 text-sm font-bold hover:bg-[#092E5C] transition-colors disabled:opacity-60"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {isSubmitting ? "Submitting…" : "Submit Request"}
             </button>
@@ -155,30 +164,30 @@ export default function MyAppointmentsPage() {
         </form>
       )}
 
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+      <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
         {isLoading ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
         ) : loadError ? (
-          <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Lora', serif" }}>{loadError}</p>
+          <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Inter', sans-serif" }}>{loadError}</p>
         ) : appointments.length === 0 ? (
-          <p className="text-sm text-[#8A8578] text-center py-6" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#8A8578] text-center py-6" style={{ fontFamily: "'Inter', sans-serif" }}>
             No appointments yet.
           </p>
         ) : (
           <div className="flex flex-col gap-3">
             {appointments.map((a) => (
-              <div key={a.id} className="rounded-xl border border-[#0B3D7A]/10 p-4 flex items-center justify-between flex-wrap gap-3">
+              <div key={a.id} className="rounded-xl border border-[#E3E8EF] p-4 flex items-center justify-between flex-wrap gap-3">
                 <div>
-                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Lora', serif" }}>
-                    {a.appointment_date} · {a.appointment_time}
+                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {formatLongDate(String(a.appointment_date).slice(0, 10))} · {formatTime(a.appointment_time)}
                   </p>
-                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {a.reason || "No reason given"}
                   </p>
                 </div>
                 <span
                   className={`text-xs font-bold px-3 py-1.5 rounded-full ${STATUS_STYLES[a.status] || "bg-gray-100 text-gray-600"}`}
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {a.status}
                 </span>

@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { User, CalendarClock, Pill, MapPin } from "lucide-react";
+import { User, CalendarClock, Pill, MapPin, ClipboardList } from "lucide-react";
 import axios from "axios";
 import OutbreakAlert from "../../components/OutbreakAlert";
 
@@ -9,10 +9,10 @@ const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:808
 function InfoRow({ label, value }) {
   return (
     <div className="flex items-center justify-between py-2 border-b border-[#0B3D7A]/10 last:border-0">
-      <span className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+      <span className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
         {label}
       </span>
-      <span className="text-sm font-bold text-[#1A1A1A]" style={{ fontFamily: "'Lora', serif" }}>
+      <span className="text-sm font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
         {value || "—"}
       </span>
     </div>
@@ -24,16 +24,16 @@ function StatCard({ icon: Icon, label, value, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 flex items-center gap-4 text-left hover:shadow-md transition-shadow"
+      className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 flex items-center gap-4 text-left hover:shadow-md transition-shadow"
     >
       <div className="rounded-full bg-[#0B3D7A]/10 p-3">
         <Icon size={22} className="text-[#0B3D7A]" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {value}
         </p>
-        <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {label}
         </p>
       </div>
@@ -103,17 +103,19 @@ export default function PatientDashboardPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         Welcome, {patient?.full_name ?? auth?.user?.full_name ?? "Patient"}!
       </h2>
-      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Your ManilaCare profile and health summary
       </p>
 
       <OutbreakAlert auth={auth} showTips />
 
+      {!isLoading && patient && <CompleteRecordReminder patient={patient} onOpen={() => navigate("/patient/record")} />}
+
       {loadError && (
-        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           {loadError}
         </p>
       )}
@@ -140,15 +142,15 @@ export default function PatientDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
             <User size={18} className="text-[#0B3D7A]" />
-            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Basic Information
             </h3>
           </div>
           {isLoading ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
           ) : (
             <div>
               <InfoRow label="Full Name" value={patient?.full_name} />
@@ -163,15 +165,15 @@ export default function PatientDashboardPage() {
           )}
         </div>
 
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
             <MapPin size={18} className="text-[#0B3D7A]" />
-            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Health Center & Address
             </h3>
           </div>
           {isLoading ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
           ) : (
             <div>
               <InfoRow label="Assigned Health Center" value={healthCenterName} />
@@ -184,6 +186,51 @@ export default function PatientDashboardPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+// Fields we ask every patient to fill in after sign-up.
+const RECORD_CHECKLIST = [
+  "contact_number",
+  "address",
+  "civil_status",
+  "educational_attainment",
+  "occupation",
+  "blood_type",
+  "allergies",
+  "philhealth_status",
+];
+
+/** Big, friendly reminder until the patient completes their personal record. */
+function CompleteRecordReminder({ patient, onOpen }) {
+  const filled = RECORD_CHECKLIST.filter((key) => String(patient[key] ?? "").trim() !== "").length;
+  const missingVaccines = (patient.immunization_records ?? []).length === 0;
+  if (filled === RECORD_CHECKLIST.length && !missingVaccines) return null;
+
+  const percent = Math.round((filled / RECORD_CHECKLIST.length) * 100);
+
+  return (
+    <div className="mb-6 rounded-2xl border-2 border-[#0B3D7A]/20 bg-[#EEF4FB] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="rounded-full bg-[#0B3D7A] p-3 self-start">
+        <ClipboardList size={26} className="text-white" aria-hidden="true" />
+      </div>
+      <div className="flex-1">
+        <p className="text-lg sm:text-xl font-bold text-[#0B3D7A]">Please complete your personal record</p>
+        <p className="text-base text-[#33404D]">
+          Add your blood type, allergies, PhilHealth, and vaccines so the health center can take better care of you.
+        </p>
+        <div className="mt-3 h-3 w-full max-w-sm rounded-full bg-white border border-[#0B3D7A]/20 overflow-hidden" aria-hidden="true">
+          <div className="h-full bg-[#1B5E20]" style={{ width: `${percent}%` }} />
+        </div>
+        <p className="mt-1 text-sm text-[#5B6470]">{percent}% complete</p>
+      </div>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="h-12 rounded-xl bg-[#1B5E20] px-6 text-base sm:text-lg font-bold text-white hover:bg-[#164D1A]"
+      >
+        Complete my record
+      </button>
     </div>
   );
 }

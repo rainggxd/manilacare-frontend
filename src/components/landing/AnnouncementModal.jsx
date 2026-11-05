@@ -35,10 +35,14 @@ export default function AnnouncementModal({ post, onClose }) {
       <div
         className="w-full max-w-2xl max-h-full overflow-y-auto rounded-2xl bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
-        style={{ fontFamily: "'Lora', serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
-        <div className="h-2 rounded-t-2xl" style={{ backgroundColor: style.color }} />
-        <div className="p-6 sm:p-8">
+        {post.image ? (
+          <img src={post.image} alt="" className="w-full max-h-[50vh] object-contain bg-[#F4F6F9] rounded-t-2xl" />
+        ) : (
+          <div className="h-2 rounded-t-2xl" style={{ backgroundColor: style.color }} />
+        )}
+        <div className="p-5 sm:p-8">
           <div className="flex items-start justify-between gap-4 mb-4">
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
@@ -59,8 +63,8 @@ export default function AnnouncementModal({ post, onClose }) {
 
           <h3
             id="announcement-title"
-            className="text-2xl sm:text-3xl text-[#1A1A1A] leading-snug mb-2"
-            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+            className="text-2xl sm:text-3xl text-[#1A1A1A] leading-snug mb-2 break-words"
+            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
           >
             {post.title}
           </h3>
@@ -72,7 +76,7 @@ export default function AnnouncementModal({ post, onClose }) {
             </span>
           </p>
 
-          <p className="text-[#1A1A1A]/85 leading-relaxed whitespace-pre-line">{post.body}</p>
+          <p className="text-[#1A1A1A]/85 leading-relaxed whitespace-pre-line break-words">{post.body}</p>
         </div>
       </div>
     </div>

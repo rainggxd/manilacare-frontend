@@ -48,49 +48,49 @@ export default function MyPrescriptionsPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         My Prescriptions
       </h2>
-      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Medications prescribed to you by your doctor
       </p>
 
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+      <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
         {isLoading ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
         ) : loadError ? (
-          <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Lora', serif" }}>{loadError}</p>
+          <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Inter', sans-serif" }}>{loadError}</p>
         ) : prescriptions.length === 0 ? (
-          <p className="text-sm text-[#8A8578] text-center py-6" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#8A8578] text-center py-6" style={{ fontFamily: "'Inter', sans-serif" }}>
             No prescriptions yet.
           </p>
         ) : (
           <div className="flex flex-col gap-3">
             {prescriptions.map((rx) => (
-              <div key={rx.id} className="rounded-xl border border-[#0B3D7A]/10 p-4">
+              <div key={rx.id} className="rounded-xl border border-[#E3E8EF] p-4">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="flex items-start gap-3">
                     <Pill size={18} className="text-[#0B3D7A] mt-1" />
                     <div>
-                      <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Lora', serif" }}>
+                      <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {rx.medication}
                         {rx.dosage ? ` — ${rx.dosage}` : ""}
                       </p>
-                      <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                      <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {[rx.frequency, rx.duration].filter(Boolean).join(" · ") || "—"}
                       </p>
                       {rx.instructions && (
-                        <p className="text-sm text-[#5B6470] mt-1" style={{ fontFamily: "'Lora', serif" }}>
+                        <p className="text-sm text-[#5B6470] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {rx.instructions}
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+                    <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {formatDate(rx.date_prescribed)}
                     </p>
-                    <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+                    <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       Dr. {rx.doctor_name || "—"}
                     </p>
                   </div>

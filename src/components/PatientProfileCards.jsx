@@ -46,10 +46,10 @@ const OB_FIELDS = [
 function Field({ label, value }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-xs uppercase tracking-wide text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
         {label}
       </p>
-      <p className="text-[#1A1A1A]" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
         {value}
       </p>
     </div>
@@ -58,8 +58,8 @@ function Field({ label, value }) {
 
 function Card({ title, children }) {
   return (
-    <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-      <h3 className="text-lg font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+      <h3 className="text-lg font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
         {title}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">{children}</div>
@@ -74,17 +74,17 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
   return (
     <div>
       {/* Photo first, so the staff can compare it with the person in front of them */}
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6 flex items-center gap-5 flex-wrap">
+      <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6 flex items-center gap-5 flex-wrap">
         <PatientPhoto patient={patient} size={140} />
         <div>
-          <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {show(patient.full_name)}
           </p>
-          <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {show(patient.age)} yrs · {show(patient.sex)}
           </p>
           {!patient.photo && (
-            <p className="text-xs text-[#8A8578] mt-1" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-xs text-[#8A8578] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
               No photo yet. A photo can be taken from the patient&apos;s record.
             </p>
           )}
@@ -97,6 +97,7 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
           <Field label="Sex" value={show(patient.sex)} />
           <Field label="Date of Birth" value={showDate(patient.date_of_birth)} />
           <Field label="Age" value={show(patient.age)} />
+          <Field label="Blood Type" value={patient.blood_type === "Unknown" ? "---" : show(patient.blood_type)} />
           <Field label="Civil Status" value={show(patient.civil_status)} />
           <Field label="Place of Birth" value={show(patient.place_of_birth)} />
           <Field label="Religion" value={show(patient.religion)} />
@@ -131,17 +132,17 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
         </Card>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-        <h3 className="text-lg font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <div className="mt-6 rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+        <h3 className="text-lg font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           Immunization History
         </h3>
         {immunizations.length === 0 ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
             No immunization records on file.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-[#0B3D7A]/10">
-            <table className="w-full text-left" style={{ fontFamily: "'Lora', serif" }}>
+          <div className="overflow-x-auto rounded-xl border border-[#E3E8EF]">
+            <table className="w-full text-left" style={{ fontFamily: "'Inter', sans-serif" }}>
               <thead>
                 <tr className="bg-[#F7F5F1] text-[#1A1A1A]">
                   <th className="px-4 py-2 font-bold">Vaccine</th>
@@ -150,7 +151,7 @@ export default function PatientProfileCards({ patient, healthCenterName }) {
               </thead>
               <tbody>
                 {immunizations.map((rec) => (
-                  <tr key={rec.id ?? `${rec.vaccine_name}-${rec.date_given}`} className="border-t border-[#0B3D7A]/10">
+                  <tr key={rec.id ?? `${rec.vaccine_name}-${rec.date_given}`} className="border-t border-[#E3E8EF]">
                     <td className="px-4 py-2">{show(rec.vaccine_name)}</td>
                     <td className="px-4 py-2">{showDate(rec.date_given)}</td>
                   </tr>

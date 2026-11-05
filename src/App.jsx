@@ -30,10 +30,13 @@ import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
 import PatientLayout from "./layouts/PatientLayout";
 import MyAppointmentsPage from "./pages/patient/MyAppointmentsPage";
 import MyPrescriptionsPage from "./pages/patient/MyPrescriptionsPage";
+import MyRecordPage from "./pages/patient/MyRecordPage";
 import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
 import DoctorDiagnosisPrescriptionsPage from "./pages/doctor/DoctorDiagnosisPrescriptionsPage";
-import BackupRestorePage from "./pages/dashboard/BackupRestorePage";
+import SignUpPage from "./pages/auth/SignUpPage";
+import RegistrationRequestsPage from "./pages/dashboard/RegistrationRequestsPage";
 import StaffLayout from "./layouts/StaffLayout";
+import NurseLayout from "./layouts/NurseLayout";
 import StaffDashboardPage from "./pages/staff/StaffDashboardPage";
 import CheckInPage from "./pages/staff/CheckInPage";
 import StaffPatientRecordsPage from "./pages/staff/StaffPatientRecordsPage";
@@ -115,6 +118,8 @@ function App() {
                 <Navigate to="/patient" replace />
               ) : auth.user?.role === "Staff" ? (
                 <Navigate to="/staff" replace />
+              ) : auth.user?.role === "Nurse" ? (
+                <Navigate to="/nurse" replace />
               ) : (
                 <PortalComingSoon user={auth.user} onLogout={handleLogout} />
               )
@@ -128,6 +133,7 @@ function App() {
         <Route path="/terms" element={<TermsAndConditionsPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/register" element={auth ? <Navigate to="/login" replace /> : <SignUpPage />} />
 
         <Route
           path="/dashboard"
@@ -145,21 +151,23 @@ function App() {
           <Route path="announcements" element={<AnnouncementsPage />} />
 
           {/* Master Admin = whole system, Admin = own center */}
-          <Route path="backup-restore" element={<BackupRestorePage />} />
+          {/* Backup & Restore now lives inside Settings */}
+          <Route path="backup-restore" element={<Navigate to="/dashboard/settings#backup" replace />} />
 
           {/* Admin (health center) only: all patient data */}
           <Route path="patients" element={<RoleOnly auth={auth} roles={["Admin"]}><PatientRegistrationListPage /></RoleOnly>} />
           <Route path="patients/new" element={<RoleOnly auth={auth} roles={["Admin"]}><RegisterPage /></RoleOnly>} />
+          <Route path="registration-requests" element={<RoleOnly auth={auth} roles={["Admin"]}><RegistrationRequestsPage /></RoleOnly>} />
           <Route path="records" element={<RoleOnly auth={auth} roles={["Admin"]}><PatientRecordsPage /></RoleOnly>} />
           <Route path="records/:id" element={<RoleOnly auth={auth} roles={["Admin"]}><PatientDetailPage /></RoleOnly>} />
           <Route path="qr-code" element={<RoleOnly auth={auth} roles={["Admin"]}><QRManagementPage /></RoleOnly>} />
           <Route path="appointments" element={<RoleOnly auth={auth} roles={["Admin"]}><AppointmentsPage /></RoleOnly>} />
           <Route path="reports" element={<RoleOnly auth={auth} roles={["Admin"]}><ReportsPage /></RoleOnly>} />
-          <Route path="activity-logs" element={<RoleOnly auth={auth} roles={["Admin"]}><ActivityLogsPage /></RoleOnly>} />
+          <Route path="activity-logs" element={<RoleOnly auth={auth} roles={["Master Admin", "Admin"]}><ActivityLogsPage /></RoleOnly>} />
 
           {/* Master Admin only: system management */}
           <Route path="health-centers" element={<RoleOnly auth={auth} roles={["Master Admin"]}><HealthCentersPage /></RoleOnly>} />
-          <Route path="settings" element={<RoleOnly auth={auth} roles={["Master Admin"]}><SettingsPage /></RoleOnly>} />
+          <Route path="settings" element={<RoleOnly auth={auth} roles={["Master Admin", "Admin"]}><SettingsPage /></RoleOnly>} />
         </Route>
 
         <Route
@@ -195,6 +203,24 @@ function App() {
           <Route path="scan-patient" element={<ScanPatientPage />} />
         </Route>
 
+        {/* Nurse: same front desk pages as Staff; appointments are view-only and no diagnosis is shown */}
+        <Route
+          path="/nurse"
+          element={
+            <ProtectedRoute auth={auth} role="Nurse">
+              <NurseLayout auth={auth} onLogout={handleLogout} />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<StaffDashboardPage />} />
+          <Route path="check-in" element={<CheckInPage />} />
+          <Route path="appointments" element={<AppointmentsPage />} />
+          <Route path="records" element={<StaffPatientRecordsPage />} />
+          <Route path="records/:id" element={<StaffPatientDetailPage />} />
+          <Route path="scan-qr" element={<ScanQRPage />} />
+          <Route path="scan-patient" element={<ScanPatientPage />} />
+        </Route>
+
         <Route
           path="/patient"
           element={
@@ -204,6 +230,7 @@ function App() {
           }
         >
           <Route index element={<PatientDashboardPage />} />
+          <Route path="record" element={<MyRecordPage />} />
           <Route path="appointments" element={<MyAppointmentsPage />} />
           <Route path="prescriptions" element={<MyPrescriptionsPage />} />
         </Route>
@@ -227,20 +254,20 @@ function PortalComingSoon({ user, onLogout }) {
     <div className="min-h-screen w-full bg-[#F7F5F1] flex flex-col items-center justify-center px-4 text-center">
       <h1
         className="text-3xl text-[#16324F] mb-3"
-        style={{ fontFamily: "'Playfair Display', serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         Welcome, {user?.full_name ?? "there"}!
       </h1>
-      <p className="text-[#5B6470] mb-1" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         You're successfully logged in as {user?.role ?? "a user"}.
       </p>
-      <p className="text-[#8A8578] text-sm mb-8 max-w-sm" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#8A8578] text-sm mb-8 max-w-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
         Your portal is still being built. Please check back soon.
       </p>
       <button
         onClick={onLogout}
         className="rounded-full bg-[#4B4F58] text-white px-8 py-3 hover:bg-[#3C3F47] transition-colors"
-        style={{ fontFamily: "'Lora', serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         Logout
       </button>

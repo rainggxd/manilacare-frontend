@@ -5,6 +5,7 @@ import axios from "axios";
 import { healthCenterName } from "../../utils/healthCenters";
 import MedicalBackgroundCard from "../../components/MedicalBackgroundCard";
 import CheckupHistoryCard from "../../components/CheckupHistoryCard";
+import LabResultsCard from "../../components/LabResultsCard";
 import PatientPhoto from "../../components/PatientPhoto";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
@@ -18,11 +19,11 @@ function formatDate(value) {
 
 function InfoCard({ title, children }) {
   return (
-    <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6">
-      <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6">
+      <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
         {title}
       </h3>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm" style={{ fontFamily: "'Lora', serif" }}>
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
         {children}
       </dl>
     </div>
@@ -74,12 +75,12 @@ export default function DoctorPatientDetailPage() {
   }, [id]);
 
   if (isLoading) {
-    return <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>;
+    return <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>;
   }
 
   if (loadError) {
     return (
-      <div className="rounded-2xl border border-[#8A3B27]/30 bg-[#FBEAE5] text-[#8A3B27] px-5 py-4" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="rounded-2xl border border-[#8A3B27]/30 bg-[#FBEAE5] text-[#8A3B27] px-5 py-4" style={{ fontFamily: "'Inter', sans-serif" }}>
         {loadError}
       </div>
     );
@@ -93,26 +94,26 @@ export default function DoctorPatientDetailPage() {
         type="button"
         onClick={() => navigate("/doctor/records")}
         className="mb-6 text-[#0B3D7A] hover:text-[#092E5C] transition-colors flex items-center gap-1 text-sm font-semibold"
-        style={{ fontFamily: "'Lora', serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         <ChevronLeft size={18} />
         Back to Patient Records
       </button>
 
       {/* Patient header card */}
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <PatientPhoto patient={patient} size={88} />
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {patient.full_name}
             </h2>
-            <p className="text-sm text-[#5B6470] mt-1" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#5B6470] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
               {patient.age} yrs · {patient.sex} · {healthCenterName(patient.health_center_id)}
             </p>
           </div>
         </div>
-        <div className="flex gap-6 text-sm" style={{ fontFamily: "'Lora', serif" }}>
+        <div className="flex gap-6 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
           <div>
             <p className="text-[#8A8578] text-xs uppercase tracking-wide">Family No.</p>
             <p className="font-semibold text-[#1A1A1A]">{patient.family_number || "—"}</p>
@@ -170,18 +171,19 @@ export default function DoctorPatientDetailPage() {
         onSaved={(changes) => setPatient((prev) => ({ ...prev, ...changes }))}
       />
       <CheckupHistoryCard patientId={id} auth={auth} />
+      <LabResultsCard patientId={id} auth={auth} />
 
       {/* Immunization History */}
       {Array.isArray(patient.immunization_records) && patient.immunization_records.length > 0 && (
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6">
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Syringe size={18} className="text-[#0B3D7A]" />
-            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Immunization History
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[400px] border-collapse text-sm" style={{ fontFamily: "'Lora', serif" }}>
+            <table className="w-full min-w-[400px] border-collapse text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
               <thead>
                 <tr className="text-[#8A8578]">
                   <th className="text-left font-normal pb-2 pr-4">Vaccine</th>
@@ -190,7 +192,7 @@ export default function DoctorPatientDetailPage() {
               </thead>
               <tbody>
                 {patient.immunization_records.map((rec, i) => (
-                  <tr key={i} className="border-t border-[#0B3D7A]/10">
+                  <tr key={i} className="border-t border-[#E3E8EF]">
                     <td className="py-2 pr-4 text-[#1A1A1A]">{rec.vaccine_name}</td>
                     <td className="py-2 text-[#5B6470]">{formatDate(rec.date_given)}</td>
                   </tr>

@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { QrCode, RefreshCw, Search } from "lucide-react";
 import QRCode from "qrcode";
 import axios from "axios";
+import { useConfirm } from "../../components/ConfirmDialog";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -25,10 +26,11 @@ function QrImage({ token, size = 140 }) {
     return <div className="w-[140px] h-[140px] bg-[#F7F5F1] rounded-xl animate-pulse" />;
   }
 
-  return <img src={dataUrl} alt="Patient QR code" className="rounded-xl border border-[#0B3D7A]/10" width={size} height={size} />;
+  return <img src={dataUrl} alt="Patient QR code" className="rounded-xl border border-[#E3E8EF]" width={size} height={size} />;
 }
 
 export default function QRManagementPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
@@ -79,6 +81,15 @@ export default function QRManagementPage() {
   }, [patients, search]);
 
   async function handleGenerate(patientId) {
+    const p = patients.find((x) => x.id === patientId);
+    const hasQr = qrByPatientId.has(String(patientId));
+    const ok = await confirm({
+      title: `Generate a QR code for ${p?.full_name ?? "this patient"}?`,
+      message: hasQr ? "The old QR code will stop working. Give the patient the new QR card." : "The patient will use this QR code at check-in.",
+      confirmText: "Yes, generate",
+      tone: hasQr ? "danger" : "primary",
+    });
+    if (!ok) return;
     setGeneratingId(patientId);
     setActionError("");
     try {
@@ -95,10 +106,10 @@ export default function QRManagementPage() {
     <div>
       <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
             QR Code Management
           </h2>
-          <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
             Generate and manage patient QR codes used for check-in
           </p>
         </div>
@@ -110,38 +121,38 @@ export default function QRManagementPage() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search patient…"
             className="w-full rounded-full bg-white border border-[#0B3D7A]/15 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0B3D7A]/30"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           />
         </div>
       </div>
 
       {loadError && (
-        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           {loadError}
         </p>
       )}
       {actionError && (
-        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           {actionError}
         </p>
       )}
 
       {isLoading ? (
-        <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+        <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
       ) : filteredPatients.length === 0 ? (
-        <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>No patients found.</p>
+        <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>No patients found.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredPatients.map((p) => {
             const qr = qrByPatientId.get(String(p.id));
             const isGenerating = generatingId === p.id;
             return (
-              <div key={p.id} className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-5 flex flex-col items-center text-center">
+              <div key={p.id} className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-5 flex flex-col items-center text-center">
                 <div className="mb-3">
-                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {p.full_name}
                   </p>
-                  <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-xs text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Family No. {p.family_number || "—"}
                   </p>
                 </div>
@@ -159,7 +170,7 @@ export default function QRManagementPage() {
                   onClick={() => handleGenerate(p.id)}
                   disabled={isGenerating}
                   className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#0B3D7A] text-white px-5 py-2 text-sm font-semibold hover:bg-[#0A3468] transition-colors disabled:opacity-60"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {isGenerating ? (
                     <RefreshCw size={14} className="animate-spin" />

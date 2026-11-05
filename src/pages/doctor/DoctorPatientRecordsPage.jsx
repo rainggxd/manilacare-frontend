@@ -65,10 +65,10 @@ export default function DoctorPatientRecordsPage() {
     <div>
       <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patient Records
           </h2>
-          <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {doctorHealthCenterId ? healthCenterName(doctorHealthCenterId) : "Your patients"}
           </p>
         </div>
@@ -81,36 +81,36 @@ export default function DoctorPatientRecordsPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, family no., or disease"
             className="w-full rounded-full border border-[#1B5E20]/30 pl-11 pr-4 py-2.5 text-sm text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#0B3D7A]/40"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-[#0B3D7A]/20">
-        <table className="w-full min-w-[680px] border-collapse text-left" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="overflow-x-auto rounded-2xl border border-[#E3E8EF] bg-white shadow-sm">
+        <table className="w-full min-w-[680px] border-collapse text-left" style={{ fontFamily: "'Inter', sans-serif" }}>
           <thead>
-            <tr className="bg-[#0B3D7A] text-white">
-              <th className="px-4 py-3 font-bold">Patient</th>
-              <th className="px-4 py-3 font-bold">Family No.</th>
-              <th className="px-4 py-3 font-bold">Age</th>
-              <th className="px-4 py-3 font-bold">Sex</th>
-              <th className="px-4 py-3 font-bold">Type of Disease</th>
-              <th className="px-4 py-3 font-bold">Registered</th>
+            <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
+              <th className="px-4 py-3 font-semibold">Patient</th>
+              <th className="px-4 py-3 font-semibold">Family No.</th>
+              <th className="px-4 py-3 font-semibold">Age</th>
+              <th className="px-4 py-3 font-semibold">Sex</th>
+              <th className="px-4 py-3 font-semibold">Type of Disease</th>
+              <th className="px-4 py-3 font-semibold">Registered</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={6} className="px-4 py-6 text-center">Loading…</td>
               </tr>
             )}
             {!isLoading && loadError && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={6} className="px-4 py-6 text-center">{loadError}</td>
               </tr>
             )}
             {!isLoading && !loadError && filteredPatients.length === 0 && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={6} className="px-4 py-6 text-center">
                   {patients.length === 0 ? "No patient records yet." : "No patients match your search."}
                 </td>
@@ -120,7 +120,7 @@ export default function DoctorPatientRecordsPage() {
                            <tr
                 key={p.id}
                 onClick={() => navigate(`/doctor/records/${p.id}`)}
-                className="bg-[#1B5E20] text-white border-t border-white/10 cursor-pointer hover:bg-[#164D1A] transition-colors"
+                className="bg-white text-[#1A1A1A] border-t border-[#E3E8EF] cursor-pointer hover:bg-[#F4F6F9] transition-colors"
               >
                 <td className="px-4 py-3">{p.full_name}</td>
                 <td className="px-4 py-3">{p.family_number || "—"}</td>
@@ -136,7 +136,7 @@ export default function DoctorPatientRecordsPage() {
         </table>
       </div>
 
-      <p className="text-xs text-[#5B6470] mt-3" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-xs text-[#5B6470] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
         View-only — patient editing and diagnosis input coming next.
       </p>
     </div>

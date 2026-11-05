@@ -39,22 +39,22 @@ export default function HeroCarousel({ title, tagline, pinnedPosts = [], onOpenP
         backgroundPosition: "center",
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-14 sm:py-20 min-h-[360px] sm:min-h-[400px] flex items-center">
+      <div className="max-w-6xl mx-auto px-5 sm:px-16 pt-12 pb-16 sm:py-20 min-h-[420px] sm:min-h-[420px] flex items-center">
         {slide.type === "welcome" ? (
-          <div className="max-w-2xl" key="welcome">
-            <p className="uppercase tracking-[0.2em] text-xs sm:text-sm text-white/75 mb-3" style={{ fontFamily: "'Lora', serif" }}>
+          <div className="max-w-2xl min-w-0" key="welcome">
+            <p className="uppercase tracking-[0.2em] text-xs sm:text-sm text-white/75 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               Manila Health Department
             </p>
             <h1
-              className="text-4xl sm:text-6xl leading-tight mb-4"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+              className="text-4xl sm:text-6xl leading-tight mb-4 break-words"
+              style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
             >
               {title}
             </h1>
-            <p className="text-base sm:text-xl text-white/90 mb-8" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-base sm:text-xl text-white/90 mb-8" style={{ fontFamily: "'Inter', sans-serif" }}>
               {tagline}
             </p>
-            <div className="flex flex-wrap gap-3" style={{ fontFamily: "'Lora', serif" }}>
+            <div className="flex flex-wrap gap-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               <Link
                 to="/login"
                 className="rounded-full bg-[#1B5E20] px-7 py-3 font-semibold hover:bg-[#164D1A] transition-colors"
@@ -112,7 +112,7 @@ export default function HeroCarousel({ title, tagline, pinnedPosts = [], onOpenP
               {paused ? <Play size={14} /> : <Pause size={14} />}
             </button>
           </div>
-          <span className="absolute top-3 left-4 text-xs text-white/70" style={{ fontFamily: "'Lora', serif" }}>
+          <span className="absolute top-3 left-4 text-xs text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>
             {current + 1} of {total}
           </span>
         </>
@@ -126,7 +126,8 @@ function PostSlide({ post, onOpen }) {
   const Icon = style.icon;
 
   return (
-    <div className="max-w-2xl" style={{ fontFamily: "'Lora', serif" }}>
+    <div className="w-full min-w-0 flex flex-col md:flex-row md:items-center gap-6 md:gap-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="max-w-2xl min-w-0 flex-1">
       <span
         className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold mb-4"
         style={{ color: style.color }}
@@ -135,15 +136,15 @@ function PostSlide({ post, onOpen }) {
         {style.label}
       </span>
       <h2
-        className="text-3xl sm:text-5xl leading-tight mb-3"
-        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+        className="text-2xl sm:text-4xl lg:text-5xl leading-tight mb-3 break-words line-clamp-3"
+        style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
       >
         {post.title}
       </h2>
-      <p className="text-sm text-white/75 mb-4">
+      <p className="text-sm text-white/75 mb-4 break-words">
         {formatPostDate(post.publish_date)} · {post.center_name || "All health centers"}
       </p>
-      <p className="text-base sm:text-lg text-white/90 mb-7">{excerpt(post.body, 180)}</p>
+      <p className="text-base sm:text-lg text-white/90 mb-7 break-words line-clamp-3 sm:line-clamp-4">{excerpt(post.body, 180)}</p>
       <button
         type="button"
         onClick={onOpen}
@@ -151,6 +152,16 @@ function PostSlide({ post, onOpen }) {
       >
         Read More
       </button>
+    </div>
+    {post.image && (
+      <button type="button" onClick={onOpen} className="hidden md:block shrink-0" aria-label={`Open ${post.title}`}>
+        <img
+          src={post.image}
+          alt=""
+          className="w-80 lg:w-96 max-h-72 object-cover rounded-2xl shadow-2xl border-4 border-white/80"
+        />
+      </button>
+    )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import FaceCapture from "../../components/FaceCapture";
 import PatientProfileCards from "../../components/PatientProfileCards";
 import PatientPhoto from "../../components/PatientPhoto";
 import { healthCenterName } from "../../utils/healthCenters";
+import { useConfirm } from "../../components/ConfirmDialog";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -17,6 +18,7 @@ const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:808
  * page or the check-in search instead.
  */
 export default function ScanPatientPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
@@ -78,6 +80,8 @@ export default function ScanPatientPage() {
 
   async function handleCheckIn() {
     if (!suggested) return;
+    const ok = await confirm({ title: `Check in ${suggested.full_name ?? "this patient"}?`, message: "A queue number will be given for today's visit.", confirmText: "Yes, check in" });
+    if (!ok) return;
     setIsCheckingIn(true);
     setCheckInMessage("");
     try {
@@ -96,18 +100,18 @@ export default function ScanPatientPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         Scan Patient
       </h2>
-      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Scan a patient's face to find their record. Only patients with a saved face can be found this way.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
             <ScanFace size={18} className="text-[#0B3D7A]" />
-            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Face Scan
             </h3>
           </div>
@@ -116,32 +120,32 @@ export default function ScanPatientPage() {
             <>
               <FaceCapture samples={2} buttonLabel="Scan Face" onCaptured={handleCaptured} />
               {error && (
-                <p role="alert" className="text-sm text-center text-[#8A3B27] mt-3" style={{ fontFamily: "'Lora', serif" }}>
+                <p role="alert" className="text-sm text-center text-[#8A3B27] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {error}
                 </p>
               )}
             </>
           ) : (
-            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Face scanned. Use the panel on the right, or press Scan Another to start again.
             </p>
           )}
         </div>
 
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Result
           </h3>
 
           {step === "scan" && (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
               No face scanned yet. Ask the patient to look at the camera, then press Scan Face.
             </p>
           )}
 
           {step === "notfound" && (
             <div>
-              <p className="text-sm text-[#8A3B27] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-sm text-[#8A3B27] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                 No clear match was found. The patient may not have a saved face, or the picture was not clear.
                 Try again with better lighting, or use Scan QR Code or the Patient Check-In search.
               </p>
@@ -150,16 +154,16 @@ export default function ScanPatientPage() {
 
           {(step === "suggested" || step === "confirmed") && suggested && (
             <div>
-              <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4 flex items-start gap-4">
+              <div className="rounded-xl border border-[#E3E8EF] p-4 mb-4 flex items-start gap-4">
                 <PatientPhoto patient={{ ...suggested, photo: suggested.photo || profile?.photo }} size={96} />
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-[#8A8578] mb-1" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-xs uppercase tracking-wide text-[#8A8578] mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {step === "suggested" ? "Possible match" : "Confirmed patient"}
                   </p>
-                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {suggested.full_name}
                   </p>
-                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Family No. {suggested.family_number || "—"}
                   </p>
                 </div>
@@ -167,7 +171,7 @@ export default function ScanPatientPage() {
 
               {step === "suggested" && (
                 <>
-                  <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Ask the patient to say their name. Is this the patient?
                   </p>
                   <div className="flex flex-wrap gap-3">
@@ -175,7 +179,7 @@ export default function ScanPatientPage() {
                       type="button"
                       onClick={handleConfirm}
                       className="rounded-full bg-[#1B5E20] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#164D1A] transition-colors"
-                      style={{ fontFamily: "'Lora', serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       Yes, this is the patient
                     </button>
@@ -183,7 +187,7 @@ export default function ScanPatientPage() {
                       type="button"
                       onClick={reset}
                       className="rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-6 py-2.5 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-                      style={{ fontFamily: "'Lora', serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       No, scan again
                     </button>
@@ -196,7 +200,7 @@ export default function ScanPatientPage() {
                   {checkInMessage && (
                     <p
                       className={`text-sm mb-3 ${checkInMessage.includes("success") ? "text-[#1B5E20]" : "text-[#8A3B27]"}`}
-                      style={{ fontFamily: "'Lora', serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {checkInMessage}
                     </p>
@@ -207,7 +211,7 @@ export default function ScanPatientPage() {
                       onClick={handleCheckIn}
                       disabled={isCheckingIn}
                       className="inline-flex items-center gap-2 rounded-full bg-[#1B5E20] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#164D1A] transition-colors disabled:opacity-60"
-                      style={{ fontFamily: "'Lora', serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       <UserCheck size={16} />
                       {isCheckingIn ? "Checking in…" : "Check In This Patient"}
@@ -216,7 +220,7 @@ export default function ScanPatientPage() {
                       type="button"
                       onClick={reset}
                       className="rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-6 py-2.5 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-                      style={{ fontFamily: "'Lora', serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       Scan Another
                     </button>
@@ -230,13 +234,13 @@ export default function ScanPatientPage() {
 
       {step === "confirmed" && (
         <div className="mt-8">
-          <h3 className="text-2xl text-[#1B5E20] font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-2xl text-[#1B5E20] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patient Record
           </h3>
           {isLoadingProfile ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading record…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading record…</p>
           ) : profileError ? (
-            <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Lora', serif" }}>{profileError}</p>
+            <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Inter', sans-serif" }}>{profileError}</p>
           ) : profile ? (
             <PatientProfileCards patient={profile} healthCenterName={healthCenterName} />
           ) : null}

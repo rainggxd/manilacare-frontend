@@ -8,6 +8,8 @@ import FaceEnrollModal from "../../components/FaceEnrollModal";
 import PatientProfileCards from "../../components/PatientProfileCards";
 import PatientPhoto from "../../components/PatientPhoto";
 import { healthCenterName } from "../../utils/healthCenters";
+import { useConfirm } from "../../components/ConfirmDialog";
+import SearchableSelect from "../../components/SearchableSelect";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 const SCANNER_ELEMENT_ID = "qr-scanner-region";
@@ -19,6 +21,7 @@ const OVERRIDE_REASONS = [
 ];
 
 export default function ScanQRPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
@@ -206,6 +209,12 @@ export default function ScanQRPage() {
 
   async function handleOverride() {
     if (!patient) return;
+    const okOverride = await confirm({
+      title: "Confirm identity manually?",
+      message: "Only do this after checking the patient's ID. Your name and reason will be saved in the activity logs.",
+      confirmText: "Yes, I checked the ID",
+    });
+    if (!okOverride) return;
     setIsOverriding(true);
     setFaceMessage("");
     try {
@@ -223,8 +232,9 @@ export default function ScanQRPage() {
     }
   }
 
-  function handleEnrollClose(enrolled) {
+  function handleEnrollClose(enrolled, photo) {
     setShowEnroll(false);
+    if (photo) setPatient((prev) => (prev ? { ...prev, photo } : prev));
     if (enrolled) {
       // The patient was just captured at the desk, so treat them as verified.
       setFaceStatus({ enabled: true, enrolled: true });
@@ -235,6 +245,8 @@ export default function ScanQRPage() {
 
   async function handleCheckIn() {
     if (!patient || !canCheckIn) return;
+    const ok = await confirm({ title: `Check in ${patient.full_name ?? "this patient"}?`, message: "A queue number will be given for today's visit.", confirmText: "Yes, check in" });
+    if (!ok) return;
     setIsCheckingIn(true);
     setCheckInMessage("");
     try {
@@ -269,15 +281,15 @@ export default function ScanQRPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         Scan Patient QR Code
       </h2>
-      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Scan a patient's QR code to pull up their record and check them in
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
           <div className="relative rounded-xl overflow-hidden bg-black/5 min-h-[280px]">
             <div id={SCANNER_ELEMENT_ID} className="w-full min-h-[280px]" />
 
@@ -289,7 +301,7 @@ export default function ScanQRPage() {
           </div>
 
           {scanError && (
-            <p className="text-sm text-[#8A3B27] mt-4" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A3B27] mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
               {scanError}
             </p>
           )}
@@ -300,7 +312,7 @@ export default function ScanQRPage() {
                 type="button"
                 onClick={startScanner}
                 className="inline-flex items-center gap-2 rounded-full bg-[#0B3D7A] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#0A3468] transition-colors"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 <ScanLine size={16} />
                 Start Scanning
@@ -310,7 +322,7 @@ export default function ScanQRPage() {
                 type="button"
                 onClick={stopScanner}
                 className="inline-flex items-center gap-2 rounded-full bg-[#8A3B27] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#742F20] transition-colors"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 <X size={16} />
                 Stop Camera
@@ -321,7 +333,7 @@ export default function ScanQRPage() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex items-center gap-2 rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-6 py-2.5 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               <Upload size={16} />
               Upload QR Image
@@ -336,56 +348,56 @@ export default function ScanQRPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Scanned Patient
           </h3>
 
           {isLookingUp ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Looking up patient…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Looking up patient…</p>
           ) : !patient ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
               No patient scanned yet. Start the camera or upload a QR image.
             </p>
           ) : (
             <div>
-              <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4 flex items-start gap-4">
+              <div className="rounded-xl border border-[#E3E8EF] p-4 mb-4 flex items-start gap-4">
                 <PatientPhoto patient={patient} size={96} />
                 <div>
-                <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {patient.full_name}
                 </p>
-                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                   Family No. {patient.family_number || "—"}
                 </p>
-                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {patient.sex || "—"}
                 </p>
-                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+                <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {patient.contact_number || "—"}
                 </p>
                 </div>
               </div>
 
               {faceStatus?.enabled && (
-                <div className="rounded-xl border border-[#0B3D7A]/10 p-4 mb-4">
+                <div className="rounded-xl border border-[#E3E8EF] p-4 mb-4">
                   <div className="flex items-center gap-2 mb-2">
                     <ScanFace size={18} className="text-[#0B3D7A]" />
-                    <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       Face Verification
                     </p>
                   </div>
 
                   {!faceStatus.enrolled ? (
                     <>
-                      <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+                      <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                         No face is saved for this patient. You can check them in without face verification.
                       </p>
                       <button
                         type="button"
                         onClick={() => setShowEnroll(true)}
                         className="rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-5 py-2 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-                        style={{ fontFamily: "'Lora', serif" }}
+                        style={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         Register Face Now
                       </button>
@@ -395,14 +407,14 @@ export default function ScanQRPage() {
                       {faceMessage && (
                         <p
                           className={`text-sm mb-3 ${faceStep === "matched" ? "text-[#1B5E20]" : "text-[#8A3B27]"}`}
-                          style={{ fontFamily: "'Lora', serif" }}
+                          style={{ fontFamily: "'Inter', sans-serif" }}
                         >
                           {faceMessage}
                         </p>
                       )}
 
                       {faceStep === "idle" && (
-                        <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+                        <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                           Confirm that the person in front of you is this patient.
                         </p>
                       )}
@@ -422,7 +434,7 @@ export default function ScanQRPage() {
                               setFaceStep("capturing");
                             }}
                             className="rounded-full bg-[#0B3D7A] text-white px-5 py-2 text-sm font-semibold hover:bg-[#0A3468] transition-colors"
-                            style={{ fontFamily: "'Lora', serif" }}
+                            style={{ fontFamily: "'Inter', sans-serif" }}
                           >
                             {faceStep === "mismatch" ? "Try Again" : "Verify Face"}
                           </button>
@@ -431,7 +443,7 @@ export default function ScanQRPage() {
                               type="button"
                               onClick={() => setShowOverride(true)}
                               className="rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-5 py-2 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-                              style={{ fontFamily: "'Lora', serif" }}
+                              style={{ fontFamily: "'Inter', sans-serif" }}
                             >
                               Check In Without Face Match
                             </button>
@@ -444,7 +456,7 @@ export default function ScanQRPage() {
                           type="button"
                           onClick={() => setFaceStep("idle")}
                           className="text-sm text-[#5B6470] underline"
-                          style={{ fontFamily: "'Lora', serif" }}
+                          style={{ fontFamily: "'Inter', sans-serif" }}
                         >
                           Cancel
                         </button>
@@ -452,24 +464,22 @@ export default function ScanQRPage() {
 
                       {showOverride && (faceStep === "idle" || faceStep === "mismatch") && (
                         <div className="mt-4 rounded-lg bg-[#F7F5F1] p-3">
-                          <label className="block text-xs text-[#5B6470] mb-1" style={{ fontFamily: "'Lora', serif" }}>
+                          <label className="block text-xs text-[#5B6470] mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Reason (saved in the activity log)
                           </label>
-                          <select
+                          <SearchableSelect
+                            rounded="lg"
+                            options={OVERRIDE_REASONS.map((r) => ({ value: r, label: r }))}
                             value={overrideReason}
-                            onChange={(e) => setOverrideReason(e.target.value)}
-                            className="w-full rounded-full bg-white px-4 py-2 text-sm text-[#1A1A1A] outline-none border border-[#0B3D7A]/15"
-                          >
-                            {OVERRIDE_REASONS.map((r) => (
-                              <option key={r} value={r}>{r}</option>
-                            ))}
-                          </select>
+                            onChange={(v) => setOverrideReason(v || OVERRIDE_REASONS[0])}
+                            ariaLabel="Reason"
+                          />
                           <button
                             type="button"
                             onClick={handleOverride}
                             disabled={isOverriding}
                             className="mt-3 rounded-full bg-[#8A3B27] text-white px-5 py-2 text-sm font-semibold hover:bg-[#742F20] transition-colors disabled:opacity-60"
-                            style={{ fontFamily: "'Lora', serif" }}
+                            style={{ fontFamily: "'Inter', sans-serif" }}
                           >
                             {isOverriding ? "Saving…" : "Confirm and Continue"}
                           </button>
@@ -481,7 +491,7 @@ export default function ScanQRPage() {
               )}
 
               {faceStatus?.unavailable && (
-                <p className="text-xs text-[#8A8578] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+                <p className="text-xs text-[#8A8578] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                   Face verification is not available right now.
                 </p>
               )}
@@ -489,7 +499,7 @@ export default function ScanQRPage() {
               {checkInMessage && (
                 <p
                   className={`text-sm mb-3 ${checkInMessage.includes("success") ? "text-[#1B5E20]" : "text-[#8A3B27]"}`}
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {checkInMessage}
                 </p>
@@ -501,7 +511,7 @@ export default function ScanQRPage() {
                   onClick={handleCheckIn}
                   disabled={isCheckingIn || !canCheckIn}
                   className="inline-flex items-center gap-2 rounded-full bg-[#1B5E20] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#164D1A] transition-colors disabled:opacity-60"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   <UserCheck size={16} />
                   {isCheckingIn ? "Checking in…" : "Check In This Patient"}
@@ -510,7 +520,7 @@ export default function ScanQRPage() {
                   type="button"
                   onClick={handleReset}
                   className="rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-6 py-2.5 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   Scan Another
                 </button>
@@ -522,11 +532,11 @@ export default function ScanQRPage() {
 
       {patient && (profile || profileError) && (
         <div className="mt-8">
-          <h3 className="text-2xl text-[#1B5E20] font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-2xl text-[#1B5E20] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patient Record
           </h3>
           {profileError ? (
-            <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Lora', serif" }}>{profileError}</p>
+            <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Inter', sans-serif" }}>{profileError}</p>
           ) : (
             <PatientProfileCards patient={profile} healthCenterName={healthCenterName} />
           )}

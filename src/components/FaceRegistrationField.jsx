@@ -24,17 +24,17 @@ export default function FaceRegistrationField({ descriptor, consent, error, onCo
     <div className="mt-8 rounded-2xl bg-white/95 border border-[#1B5E20]/20 shadow-sm p-4 sm:p-5">
       <div className="flex items-center gap-2 mb-2">
         <ScanFace size={18} className="text-[#0B3D7A]" />
-        <h3 className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h3 className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           Face Registration (required)
         </h3>
       </div>
 
-      <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-sm text-[#5B6470] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
         The system saves a set of numbers made from the face, not a photo. It is used to confirm the patient's
         identity at check-in, and it can be removed on request.
       </p>
 
-      <label className="flex items-start gap-2 mb-4 text-sm text-[#1A1A1A]" style={{ fontFamily: "'Lora', serif" }}>
+      <label className="flex items-start gap-2 mb-4 text-sm text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
         <input
           type="checkbox"
           checked={consent}
@@ -46,7 +46,7 @@ export default function FaceRegistrationField({ descriptor, consent, error, onCo
 
       {consent && captured && (
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-[#1B5E20] font-semibold" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#1B5E20] font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
             Face captured.
           </p>
           <button
@@ -56,7 +56,7 @@ export default function FaceRegistrationField({ descriptor, consent, error, onCo
               setRetaking(true);
             }}
             className="rounded-full bg-[#F7F5F1] text-[#1A1A1A] px-5 py-2 text-sm font-semibold hover:bg-[#EDEAE3] transition-colors"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             Retake
           </button>

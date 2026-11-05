@@ -3,6 +3,11 @@ import { useOutletContext } from "react-router-dom";
 import { Plus, Check, X, Trash2 } from "lucide-react";
 import axios from "axios";
 import { healthCenterName } from "../../utils/healthCenters";
+import { formatTime, formatLongDate } from "../../utils/dates";
+import SearchableSelect from "../../components/SearchableSelect";
+import { patientOptions } from "../../utils/patientOptions";
+import { useConfirm } from "../../components/ConfirmDialog";
+import { appointmentStatusConfirm } from "../../utils/appointmentConfirm";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -25,8 +30,11 @@ function StatusBadge({ status }) {
 }
 
 export default function AppointmentsPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
+  // Nurses can see the appointments but cannot add, approve, or delete them.
+  const readOnly = auth?.user?.role === "Nurse";
 
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -47,7 +55,6 @@ export default function AppointmentsPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [actionError, setActionError] = useState("");
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   async function loadAppointments() {
     setIsLoading(true);
@@ -120,6 +127,14 @@ export default function AppointmentsPage() {
       return;
     }
 
+    const patientName = patients.find((x) => String(x.id) === String(formData.patient_id))?.full_name ?? "the patient";
+    const okCreate = await confirm({
+      title: "Create this appointment?",
+      message: `For ${patientName} on ${formatLongDate(formData.appointment_date)} at ${formatTime(formData.appointment_time)}.`,
+      confirmText: "Yes, create",
+    });
+    if (!okCreate) return;
+
     setIsSaving(true);
     try {
       await axios.post(`${API_BASE_URL}/appointments`, formData, { headers: authHeader });
@@ -134,6 +149,9 @@ export default function AppointmentsPage() {
   }
 
   async function handleStatusChange(id, status) {
+    const appt = appointments.find((a) => a.id === id);
+    const ok = await confirm(appointmentStatusConfirm(status, appt?.patient_name));
+    if (!ok) return;
     setActionError("");
     try {
       await axios.put(`${API_BASE_URL}/appointments/${id}/status`, { status }, { headers: authHeader });
@@ -144,11 +162,18 @@ export default function AppointmentsPage() {
   }
 
   async function handleDelete(id) {
+    const appt = appointments.find((a) => a.id === id);
+    const ok = await confirm({
+      title: "Delete this appointment?",
+      message: `${appt?.patient_name ?? "This"} appointment will be removed. This cannot be undone.`,
+      confirmText: "Yes, delete",
+      tone: "danger",
+    });
+    if (!ok) return;
     setActionError("");
     try {
       await axios.delete(`${API_BASE_URL}/appointments/${id}`, { headers: authHeader });
       setAppointments((prev) => prev.filter((a) => a.id !== id));
-      setConfirmDeleteId(null);
     } catch (err) {
       setActionError("Unable to delete this appointment right now.");
     }
@@ -158,11 +183,11 @@ export default function AppointmentsPage() {
     <div>
       <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
             Appointments
           </h2>
-          <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
-            Manage appointment requests and approvals
+          <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {readOnly ? "Appointments of your health center (view only)" : "Manage appointment requests and approvals"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -171,108 +196,102 @@ export default function AppointmentsPage() {
             onClick={() => setTodayOnly((prev) => !prev)}
             className={`rounded-full px-5 py-3 text-sm font-semibold transition-colors whitespace-nowrap ${
               todayOnly
-                ? "bg-[#1B5E20] text-white hover:bg-[#164D1A]"
-                : "bg-white text-[#1B5E20] border border-[#1B5E20]/30 hover:bg-[#EAF3EA]"
+                ? "bg-[#0B3D7A]/10 text-[#0B3D7A] border border-[#0B3D7A]/30 hover:bg-[#0B3D7A]/15"
+                : "bg-white text-[#3D4653] border border-[#E3E8EF] hover:bg-[#F4F6F9]"
             }`}
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {todayOnly ? "Showing Today's Queue" : "Showing All Dates"}
           </button>
+        {!readOnly && (
         <button
           type="button"
           onClick={() => setShowForm((prev) => !prev)}
           className="inline-flex items-center gap-2 rounded-full bg-[#0B3D7A] text-white px-6 py-3 text-sm font-semibold hover:bg-[#0A3468] transition-colors whitespace-nowrap"
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <Plus size={16} />
           New Appointment
         </button>
+        )}
         </div>
       </div>
 
-      {showForm && (
+      {showForm && !readOnly && (
         <form
           onSubmit={handleCreate}
-          className="rounded-2xl bg-[#1B5E20] text-white p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
-          style={{ fontFamily: "'Lora', serif" }}
+          className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <div>
-            <label className="block text-xs text-white/80 mb-1">Patient</label>
-            <select
+            <label className="block text-xs font-semibold text-[#5B6470] mb-1">Patient</label>
+            <SearchableSelect
+              rounded="lg"
+              options={patientOptions(patients)}
               value={formData.patient_id}
-              onChange={(e) => handleFormChange("patient_id", e.target.value)}
-              className="w-full rounded-full bg-white px-4 py-2 text-sm text-[#1A1A1A] outline-none"
-            >
-              <option value="">Select patient…</option>
-              {patients.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.full_name}
-                </option>
-              ))}
-            </select>
+              onChange={(id) => handleFormChange("patient_id", id)}
+              placeholder="Type a name, family no. or mobile…"
+              ariaLabel="Patient"
+            />
           </div>
 
           <div>
-            <label className="block text-xs text-white/80 mb-1">Doctor (optional)</label>
-            <select
+            <label className="block text-xs font-semibold text-[#5B6470] mb-1">Doctor (optional)</label>
+            <SearchableSelect
+              rounded="lg"
+              emptyLabel="Unassigned"
+              options={doctors.map((d) => ({ value: d.id, label: `Dr. ${d.full_name}` }))}
               value={formData.doctor_user_id}
-              onChange={(e) => handleFormChange("doctor_user_id", e.target.value)}
-              className="w-full rounded-full bg-white px-4 py-2 text-sm text-[#1A1A1A] outline-none"
-            >
-              <option value="">Unassigned</option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
-                  Dr. {d.full_name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => handleFormChange("doctor_user_id", v)}
+              ariaLabel="Doctor"
+            />
           </div>
 
           <div>
-            <label className="block text-xs text-white/80 mb-1">Reason (optional)</label>
+            <label className="block text-xs font-semibold text-[#5B6470] mb-1">Reason (optional)</label>
             <input
               type="text"
               value={formData.reason}
               onChange={(e) => handleFormChange("reason", e.target.value)}
               placeholder="e.g. Follow-up checkup"
-              className="w-full rounded-full bg-white px-4 py-2 text-sm text-[#1A1A1A] outline-none"
+              className="w-full rounded-lg bg-white border border-[#CBD5E1] px-3 py-2 text-sm text-[#1A1A1A] outline-none focus:border-[#0B3D7A] focus:ring-2 focus:ring-[#0B3D7A]/20"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-white/80 mb-1">Date</label>
+            <label className="block text-xs font-semibold text-[#5B6470] mb-1">Date</label>
             <input
               type="date"
               value={formData.appointment_date}
               onChange={(e) => handleFormChange("appointment_date", e.target.value)}
-              className="w-full rounded-full bg-white px-4 py-2 text-sm text-[#1A1A1A] outline-none"
+              className="w-full rounded-lg bg-white border border-[#CBD5E1] px-3 py-2 text-sm text-[#1A1A1A] outline-none focus:border-[#0B3D7A] focus:ring-2 focus:ring-[#0B3D7A]/20"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-white/80 mb-1">Time</label>
+            <label className="block text-xs font-semibold text-[#5B6470] mb-1">Time</label>
             <input
               type="time"
               value={formData.appointment_time}
               onChange={(e) => handleFormChange("appointment_time", e.target.value)}
-              className="w-full rounded-full bg-white px-4 py-2 text-sm text-[#1A1A1A] outline-none"
+              className="w-full rounded-lg bg-white border border-[#CBD5E1] px-3 py-2 text-sm text-[#1A1A1A] outline-none focus:border-[#0B3D7A] focus:ring-2 focus:ring-[#0B3D7A]/20"
             />
           </div>
 
-          {formError && <p className="sm:col-span-2 text-sm text-red-200">{formError}</p>}
+          {formError && <p className="sm:col-span-2 text-sm text-[#B3261E]">{formError}</p>}
 
           <div className="sm:col-span-2 flex gap-3">
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded-full bg-white text-[#1B5E20] px-6 py-2.5 text-sm font-bold hover:bg-white/90 disabled:opacity-60"
+              className="rounded-full bg-[#0B3D7A] text-white px-6 py-2.5 text-sm font-bold hover:bg-[#0A3468] disabled:opacity-60"
             >
               {isSaving ? "Saving…" : "Save Appointment"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-full bg-white/20 px-6 py-2.5 text-sm font-bold hover:bg-white/30"
+              className="rounded-full bg-[#F4F6F9] text-[#3D4653] border border-[#E3E8EF] px-6 py-2.5 text-sm font-bold hover:bg-[#E3E8EF]"
             >
               Cancel
             </button>
@@ -281,73 +300,57 @@ export default function AppointmentsPage() {
       )}
 
       {actionError && (
-        <p className="text-sm text-[#8A3B27] mb-3" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#8A3B27] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
           {actionError}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-[#0B3D7A]/20">
-        <table className="w-full min-w-[940px] border-collapse text-left" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="overflow-x-auto rounded-2xl border border-[#E3E8EF] bg-white shadow-sm">
+        <table className="w-full min-w-[940px] border-collapse text-left" style={{ fontFamily: "'Inter', sans-serif" }}>
           <thead>
-            <tr className="bg-[#0B3D7A] text-white">
-              <th className="px-4 py-3 font-bold">Patient</th>
-              <th className="px-4 py-3 font-bold">Doctor</th>
-              <th className="px-4 py-3 font-bold">Health Center</th>
-              <th className="px-4 py-3 font-bold">Date</th>
-              <th className="px-4 py-3 font-bold">Time</th>
-              <th className="px-4 py-3 font-bold">Reason</th>
-              <th className="px-4 py-3 font-bold">Status</th>
-              <th className="px-4 py-3 font-bold text-right">Action</th>
+            <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
+              <th className="px-4 py-3 font-semibold">Patient</th>
+              <th className="px-4 py-3 font-semibold">Doctor</th>
+              <th className="px-4 py-3 font-semibold">Health Center</th>
+              <th className="px-4 py-3 font-semibold">Date</th>
+              <th className="px-4 py-3 font-semibold">Time</th>
+              <th className="px-4 py-3 font-semibold">Reason</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
+              <th className="px-4 py-3 font-semibold text-right">Action</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={8} className="px-4 py-6 text-center">Loading…</td>
               </tr>
             )}
             {!isLoading && loadError && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={8} className="px-4 py-6 text-center">{loadError}</td>
               </tr>
             )}
             {!isLoading && !loadError && sortedAppointments.length === 0 && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={8} className="px-4 py-6 text-center">No appointments yet.</td>
               </tr>
             )}
             {!isLoading &&
               !loadError &&
               sortedAppointments.map((a) => (
-                <tr key={a.id} className="bg-[#1B5E20] text-white border-t border-white/10">
+                <tr key={a.id} className="bg-white text-[#1A1A1A] border-t border-[#E3E8EF]">
                   <td className="px-4 py-3">{a.patient_name}</td>
                   <td className="px-4 py-3">{a.doctor_name ? `Dr. ${a.doctor_name}` : "Unassigned"}</td>
                   <td className="px-4 py-3">{healthCenterName(a.health_center_id)}</td>
-                  <td className="px-4 py-3">{a.appointment_date}</td>
-                  <td className="px-4 py-3">{a.appointment_time}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{formatLongDate(String(a.appointment_date).slice(0, 10))}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{formatTime(a.appointment_time)}</td>
                   <td className="px-4 py-3">{a.reason || "—"}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={a.status} />
                   </td>
                   <td className="px-4 py-3">
-                    {confirmDeleteId === a.id ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-xs">Delete?</span>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(a.id)}
-                          className="rounded-full bg-[#8A3B27] px-3 py-1 text-xs font-bold hover:bg-[#6f2f1f]"
-                        >
-                          Yes
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDeleteId(null)}
-                          className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold hover:bg-white/30"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                    {readOnly ? (
+                      <span className="block text-right text-xs text-[#8A94A6]">View only</span>
                     ) : (
                       <div className="flex items-center justify-end gap-1.5">
                         {a.status === "Pending" && (
@@ -356,7 +359,7 @@ export default function AppointmentsPage() {
                               type="button"
                               title="Approve"
                               onClick={() => handleStatusChange(a.id, "Approved")}
-                              className="rounded-full p-2 hover:bg-white/20 text-white"
+                              className="rounded-full p-2 text-[#5B6470] hover:bg-[#F4F6F9] hover:text-[#0B3D7A]"
                             >
                               <Check size={16} />
                             </button>
@@ -364,7 +367,7 @@ export default function AppointmentsPage() {
                               type="button"
                               title="Reject"
                               onClick={() => handleStatusChange(a.id, "Rejected")}
-                              className="rounded-full p-2 hover:bg-white/20 text-white"
+                              className="rounded-full p-2 text-[#5B6470] hover:bg-[#F4F6F9] hover:text-[#0B3D7A]"
                             >
                               <X size={16} />
                             </button>
@@ -373,8 +376,8 @@ export default function AppointmentsPage() {
                         <button
                           type="button"
                           title="Delete"
-                          onClick={() => setConfirmDeleteId(a.id)}
-                          className="rounded-full p-2 hover:bg-white/20 text-white"
+                          onClick={() => handleDelete(a.id)}
+                          className="rounded-full p-2 text-[#5B6470] hover:bg-[#F4F6F9] hover:text-[#0B3D7A]"
                         >
                           <Trash2 size={16} />
                         </button>

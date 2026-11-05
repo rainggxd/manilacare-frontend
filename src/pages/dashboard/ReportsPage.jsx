@@ -10,15 +10,15 @@ const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:808
 
 function StatCard({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-2xl bg-[#1B5E20] text-white p-5 flex items-center gap-4">
-      <div className="rounded-full bg-white/15 p-3 shrink-0">
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-5 flex items-center gap-4">
+      <div className="rounded-xl bg-[#0B3D7A]/10 text-[#0B3D7A] p-3 shrink-0">
         <Icon size={22} />
       </div>
       <div>
-        <p className="text-2xl font-bold leading-none" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <p className="text-2xl font-bold leading-none text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {value}
         </p>
-        <p className="text-xs text-white/80 mt-1" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-xs text-[#5B6470] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
           {label}
         </p>
       </div>
@@ -30,7 +30,7 @@ function BarRow({ label, count, max, color = "#0B3D7A" }) {
   const pct = max > 0 ? Math.round((count / max) * 100) : 0;
   return (
     <div className="mb-3">
-      <div className="flex items-center justify-between text-sm mb-1" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="flex items-center justify-between text-sm mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         <span className="text-[#1A1A1A]">{label}</span>
         <span className="font-bold text-[#1A1A1A]">{count}</span>
       </div>
@@ -150,16 +150,16 @@ export default function ReportsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
           Reports
         </h2>
-        <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
           System-wide statistics for patients and appointments
         </p>
       </div>
 
       {loadError && (
-        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           {loadError}
         </p>
       )}
@@ -172,10 +172,10 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-3 mt-4 mb-3">
-        <h3 className="text-lg font-bold text-[#000000]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h3 className="text-lg font-bold text-[#000000]" style={{ fontFamily: "'Inter', sans-serif" }}>
           Daily Report: {formatLongDate(reportDate)}
         </h3>
-        <label className="inline-flex items-center gap-2 text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+        <label className="inline-flex items-center gap-2 text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
           <CalendarDays size={16} />
           <input
             type="date"
@@ -195,7 +195,7 @@ export default function ReportsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="rounded-2xl border border-[#0B3D7A]/20 p-6">
-          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patients per Health Center
           </h3>
           {stats.byCenter.map((hc) => (
@@ -204,7 +204,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="rounded-2xl border border-[#0B3D7A]/20 p-6">
-          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Appointment Status Breakdown
           </h3>
           <BarRow label="Pending" count={stats.pending} max={stats.totalAppointments || 1} color="#CA8A04" />
@@ -214,7 +214,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="rounded-2xl border border-[#0B3D7A]/20 p-6">
-          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patients by Sex
           </h3>
           <BarRow label="Male" count={stats.bySex.Male} max={maxSex} color="#0B3D7A" />
@@ -222,7 +222,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="rounded-2xl border border-[#0B3D7A]/20 p-6">
-          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#000000] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Appointments per Health Center
           </h3>
           {stats.byCenter.map((hc) => (
@@ -237,14 +237,14 @@ export default function ReportsPage() {
         </div>
 
         <div className="rounded-2xl border border-[#0B3D7A]/20 p-6 lg:col-span-2">
-          <h3 className="text-lg font-bold text-[#000000] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#000000] mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
             Doctor's Activity: {formatLongDate(reportDate)}
           </h3>
-          <p className="text-xs text-[#8A8578] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-xs text-[#8A8578] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Completed appointments handled by each doctor on the selected day
           </p>
           {doctorActivity.length === 0 ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
               No Doctor accounts yet.
             </p>
           ) : (
@@ -255,7 +255,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <p className="text-xs text-[#5B6470] mt-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-xs text-[#5B6470] mt-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Figures are computed live from current patient and appointment records.
       </p>
     </div>

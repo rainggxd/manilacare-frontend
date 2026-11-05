@@ -33,13 +33,13 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
       <header className="bg-[#0B3D7A] px-4 sm:px-8 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
         <Link to="/login" className="flex items-center gap-2 sm:gap-3">
           <img src={manilaLogo} alt="Lungsod ng Maynila seal" className="h-9 w-9 sm:h-11 sm:w-11 rounded-full object-cover" />
-          <span className="text-white text-lg sm:text-2xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <span className="text-white text-lg sm:text-2xl" style={{ fontFamily: "'Inter', sans-serif" }}>
             ManilaCare
           </span>
         </Link>
         <nav className="flex items-center gap-4 sm:gap-8">
-          <a href="#about" className="text-white/90 hover:text-white text-sm sm:text-lg" style={{ fontFamily: "'Lora', serif" }}>About us</a>
-          <a href="#contact" className="text-white/90 hover:text-white text-sm sm:text-lg" style={{ fontFamily: "'Lora', serif" }}>Contact Us</a>
+          <a href="#about" className="text-white/90 hover:text-white text-sm sm:text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>About us</a>
+          <a href="#contact" className="text-white/90 hover:text-white text-sm sm:text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>Contact Us</a>
         </nav>
       </header>
 
@@ -64,10 +64,10 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
 
           <div className="flex items-start justify-between flex-wrap gap-4 mb-2">
             <div>
-              <h1 className="text-3xl sm:text-4xl text-[#1B5E20]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+              <h1 className="text-3xl sm:text-4xl text-[#1B5E20]" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
                 {title}
               </h1>
-              <p className="text-sm text-[#1A1A1A]/80 mt-1" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-sm text-[#1A1A1A]/80 mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Version {LEGAL_VERSION} · Effective {LEGAL_EFFECTIVE_DATE} · {subtitle}
               </p>
             </div>
@@ -75,7 +75,7 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
               to={switchTo.to}
               state={resumeState}
               className="rounded-full bg-[#0B3D7A] text-white px-6 py-2.5 text-sm sm:text-base font-semibold hover:bg-[#0A3468] transition-colors whitespace-nowrap"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {switchTo.label}
             </Link>
@@ -84,10 +84,10 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
 
           {summary && (
             <div className="rounded-2xl bg-[#1B5E20] text-white p-5 sm:p-6 mb-10">
-              <h2 className="text-lg sm:text-xl font-bold mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-lg sm:text-xl font-bold mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {summary.title}
               </h2>
-              <ul className="list-disc pl-5 space-y-1.5 text-sm sm:text-base leading-relaxed" style={{ fontFamily: "'Lora', serif" }}>
+              <ul className="list-disc pl-5 space-y-1.5 text-sm sm:text-base leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {summary.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -98,18 +98,18 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
           <div className="space-y-9 pb-10">
             {sections.map((section, index) => (
               <section key={section.id} id={index === 0 ? "about" : section.id}>
-                <h2 className="text-xl sm:text-2xl text-[#1B5E20] font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h2 className="text-xl sm:text-2xl text-[#1B5E20] font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {section.title}
                 </h2>
 
                 {(section.paragraphs ?? []).map((text) => (
-                  <p key={text} className="text-[#1A1A1A] text-sm sm:text-base leading-relaxed mb-3" style={{ fontFamily: "'Lora', serif" }}>
+                  <p key={text} className="text-[#1A1A1A] text-sm sm:text-base leading-relaxed mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {text}
                   </p>
                 ))}
 
                 {section.bullets && (
-                  <ul className="list-disc pl-5 space-y-1.5 text-[#1A1A1A] text-sm sm:text-base leading-relaxed mb-3" style={{ fontFamily: "'Lora', serif" }}>
+                  <ul className="list-disc pl-5 space-y-1.5 text-[#1A1A1A] text-sm sm:text-base leading-relaxed mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {section.bullets.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -118,7 +118,7 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
 
                 {section.table && (
                   <div className="overflow-x-auto rounded-2xl border border-[#1B5E20]/40 mb-3">
-                    <table className="w-full min-w-[520px] text-left text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+                    <table className="w-full min-w-[520px] text-left text-sm sm:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
                       <thead>
                         <tr className="bg-[#1B5E20] text-white">
                           {section.table.head.map((cell) => (
@@ -140,7 +140,7 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
                 )}
 
                 {section.after && (
-                  <p className="text-[#1A1A1A] text-sm sm:text-base leading-relaxed" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-[#1A1A1A] text-sm sm:text-base leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {section.after}
                   </p>
                 )}
@@ -148,10 +148,10 @@ export default function LegalLayout({ title, subtitle, switchTo, summary, sectio
             ))}
 
             <section id="contact">
-              <h2 className="text-xl sm:text-2xl text-[#1B5E20] font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-xl sm:text-2xl text-[#1B5E20] font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Contact
               </h2>
-              <p className="text-[#1A1A1A] text-sm sm:text-base leading-relaxed" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-[#1A1A1A] text-sm sm:text-base leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
                 For questions or requests about this page or your data, talk to the staff at your health center
                 ({LEGAL_HEALTH_CENTERS}).
                 {LEGAL_CONTACT_EMAIL ? ` You can also write to ${LEGAL_CONTACT_EMAIL}.` : ""}

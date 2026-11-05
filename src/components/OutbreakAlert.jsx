@@ -66,15 +66,15 @@ export default function OutbreakAlert({ auth, showTable = false, showTips = fals
             <AlertTriangle size={22} />
           </div>
           <div>
-            <p className="font-bold uppercase tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <p className="font-bold uppercase tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
               Warning: there might be a {a.disease} outbreak
             </p>
-            <p className="text-sm text-white/90 mt-1" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-white/90 mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
               {a.cases} patients were diagnosed with {a.disease} in the last {stats.window_days} days
               {showCenterName ? ` at ${a.center_name}` : ""}.
             </p>
             {showTips && (
-              <p className="text-sm text-white/90 mt-2" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-sm text-white/90 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {tipFor(a.disease)}
               </p>
             )}
@@ -83,33 +83,33 @@ export default function OutbreakAlert({ auth, showTable = false, showTips = fals
       ))}
 
       {showTable && (
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
           <div className="flex items-center gap-2 mb-1">
             <Activity size={18} className="text-[#0B3D7A]" />
-            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Diagnoses in the Last {stats.window_days} Days
             </h3>
           </div>
-          <p className="text-xs text-[#8A8578] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-xs text-[#8A8578] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             A warning appears when one disease reaches {stats.threshold} cases.
           </p>
 
           {centers.length === 0 ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
               No diagnoses recorded in the last {stats.window_days} days.
             </p>
           ) : (
             centers.map((c) => (
               <div key={c.health_center_id} className="mb-4 last:mb-0">
                 {showCenterName && (
-                  <p className="text-sm font-bold text-[#0B3D7A] mb-2" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-sm font-bold text-[#0B3D7A] mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {c.center_name}
                   </p>
                 )}
                 <div className="overflow-x-auto rounded-xl border border-[#0B3D7A]/15">
-                  <table className="w-full border-collapse text-left text-sm" style={{ fontFamily: "'Lora', serif" }}>
+                  <table className="w-full border-collapse text-left text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                     <thead>
-                      <tr className="bg-[#0B3D7A] text-white">
+                      <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
                         <th className="px-4 py-2 font-bold">Disease</th>
                         <th className="px-4 py-2 font-bold text-right">Cases</th>
                         <th className="px-4 py-2 font-bold">Status</th>
@@ -117,12 +117,12 @@ export default function OutbreakAlert({ auth, showTable = false, showTips = fals
                     </thead>
                     <tbody>
                       {c.diseases.map((d) => (
-                        <tr key={d.disease} className="border-t border-[#0B3D7A]/10">
+                        <tr key={d.disease} className="border-t border-[#E3E8EF]">
                           <td className="px-4 py-2 text-[#1A1A1A]">{d.disease}</td>
                           <td className="px-4 py-2 text-right font-bold text-[#1A1A1A]">{d.cases}</td>
                           <td className="px-4 py-2">
                             {d.is_outbreak ? (
-                              <span className="rounded-full bg-[#8A3B27] text-white text-xs font-bold px-3 py-1">
+                              <span className="inline-block whitespace-nowrap rounded-full bg-[#8A3B27] text-white text-xs font-bold px-3 py-1">
                                 Possible outbreak
                               </span>
                             ) : (

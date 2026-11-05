@@ -8,15 +8,15 @@ const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:808
 
 function StatCard({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 flex items-center gap-4">
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 flex items-center gap-4">
       <div className="rounded-full bg-[#0B3D7A]/10 p-3">
         <Icon size={22} className="text-[#0B3D7A]" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {value}
         </p>
-        <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {label}
         </p>
       </div>
@@ -70,7 +70,7 @@ export default function DoctorDashboardPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Welcome, Dr. {user?.full_name ?? "Doctor"}!
       </h2>
 
@@ -82,14 +82,14 @@ export default function DoctorDashboardPage() {
         <StatCard icon={Clock} label="Awaiting Diagnosis" value={isLoading ? "…" : myPatients.length - diagnosedCount} />
       </div>
 
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-        <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+        <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           Recently Registered
         </h3>
         {isLoading ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
         ) : recentPatients.length === 0 ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>No patients yet.</p>
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>No patients yet.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {recentPatients.map((p) => (
@@ -97,8 +97,8 @@ export default function DoctorDashboardPage() {
                 key={p.id}
                 type="button"
                 onClick={() => navigate(`/doctor/records/${p.id}`)}
-                className="flex items-center justify-between rounded-xl border border-[#0B3D7A]/10 px-4 py-3 text-left hover:bg-[#F7F5F1] transition-colors"
-                style={{ fontFamily: "'Lora', serif" }}
+                className="flex items-center justify-between rounded-xl border border-[#E3E8EF] px-4 py-3 text-left hover:bg-[#F7F5F1] transition-colors"
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 <span className="font-semibold text-[#1A1A1A]">{p.full_name}</span>
                 <span className="text-sm text-[#8A8578]">

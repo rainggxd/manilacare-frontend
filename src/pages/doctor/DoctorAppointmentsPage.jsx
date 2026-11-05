@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Check, X, Clock3 } from "lucide-react";
 import axios from "axios";
+import { formatLongDate, formatTime } from "../../utils/dates";
+import { useConfirm } from "../../components/ConfirmDialog";
+import { appointmentStatusConfirm } from "../../utils/appointmentConfirm";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -13,6 +16,7 @@ const STATUS_STYLES = {
 };
 
 export default function DoctorAppointmentsPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const user = auth?.user;
   const authHeader = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
@@ -49,6 +53,9 @@ export default function DoctorAppointmentsPage() {
   );
 
   async function handleStatusChange(id, status) {
+    const appt = appointments.find((a) => a.id === id);
+    const ok = await confirm(appointmentStatusConfirm(status, appt?.patient_name));
+    if (!ok) return;
     setUpdatingId(id);
     try {
       await axios.put(`${API_BASE_URL}/appointments/${id}/status`, { status }, { headers: authHeader });
@@ -62,20 +69,20 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         Appointments
       </h2>
-      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Requests from patients in your health center
       </p>
 
-      <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
+      <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
         {isLoading ? (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
         ) : loadError ? (
-          <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Lora', serif" }}>{loadError}</p>
+          <p className="text-sm text-[#8A3B27]" style={{ fontFamily: "'Inter', sans-serif" }}>{loadError}</p>
         ) : myAppointments.length === 0 ? (
-          <p className="text-sm text-[#8A8578] text-center py-6" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#8A8578] text-center py-6" style={{ fontFamily: "'Inter', sans-serif" }}>
             No appointment requests yet.
           </p>
         ) : (
@@ -83,21 +90,21 @@ export default function DoctorAppointmentsPage() {
             {myAppointments.map((a) => (
               <div
                 key={a.id}
-                className="rounded-xl border border-[#0B3D7A]/10 p-4 flex items-center justify-between flex-wrap gap-3"
+                className="rounded-xl border border-[#E3E8EF] p-4 flex items-center justify-between flex-wrap gap-3"
               >
                 <div>
-                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {a.patient_name}
                   </p>
-                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
-                    {a.appointment_date} · {a.appointment_time} — {a.reason || "No reason given"}
+                  <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {formatLongDate(String(a.appointment_date).slice(0, 10))} · {formatTime(a.appointment_time)} — {a.reason || "No reason given"}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <span
                     className={`text-xs font-bold px-3 py-1.5 rounded-full ${STATUS_STYLES[a.status] || "bg-gray-100 text-gray-600"}`}
-                    style={{ fontFamily: "'Lora', serif" }}
+                    style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     {a.status}
                   </span>

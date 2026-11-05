@@ -1,10 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation, useOutletContext, Link } from "react-router-dom";
 import axios from "axios";
-import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { HEALTH_CENTERS } from "../../utils/healthCenters";
 import { checkPassword } from "../../utils/passwordPolicy";
 import FaceRegistrationField from "../../components/FaceRegistrationField";
+import { useConfirm } from "../../components/ConfirmDialog";
+import SearchableSelect from "../../components/SearchableSelect";
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 const initialForm = {
@@ -107,6 +109,7 @@ const IMMUNIZATION_RIGHT = [
 ];
 
 export default function RegisterPage() {
+  const confirm = useConfirm();
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useOutletContext();
@@ -151,6 +154,9 @@ export default function RegisterPage() {
   }, [auth?.token]);
 
   const ageNum = Number(form.age);
+  // Patients aged 50+ may have no email. Without an email, the mobile number is their login.
+  const canSkipEmail = Number.isFinite(ageNum) && ageNum >= 50;
+  const noEmail = canSkipEmail && !form.email.trim();
   const showObHistory = form.sex === "Female" && Number.isFinite(ageNum) && ageNum > 0 && ageNum <= 49;
 
   useEffect(() => {
@@ -219,18 +225,25 @@ export default function RegisterPage() {
     if (!form.full_name.trim()) e.full_name = "Required.";
     if (!form.date_of_birth) e.date_of_birth = "Required.";
     if (!form.email.trim()) {
-      e.email = "Required.";
+      if (!canSkipEmail) e.email = "Required (optional only for ages 50 and above).";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       e.email = "Enter a valid email.";
     }
     if (!form.sex) e.sex = "Required.";
-    if (!form.password) {
-      e.password = "Required.";
-       } else if (checkPassword(form.password)) {
-      e.password = "8+ chars: uppercase, lowercase, number, symbol.";
+    // Without an email and without a mobile number there is no portal login, so no password is needed.
+    const needsPassword = !noEmail || Boolean(form.contact_number);
+    if (needsPassword) {
+      if (!form.password) {
+        e.password = "Required.";
+      } else if (checkPassword(form.password)) {
+        e.password = "8+ chars: uppercase, lowercase, number, symbol.";
+      }
+      if (form.confirm_password !== form.password) {
+        e.confirm_password = "Passwords must match.";
+      }
     }
-    if (form.confirm_password !== form.password) {
-      e.confirm_password = "Passwords must match.";
+    if (noEmail && form.contact_number && !/^09\d{9}$/.test(form.contact_number)) {
+      e.contact_number = "Use 11 digits starting with 09.";
     }
     if (form.contact_number && form.contact_number.length !== 11) {
       e.contact_number = "Must be exactly 11 digits.";
@@ -238,13 +251,14 @@ export default function RegisterPage() {
     if (!form.health_center_id) e.health_center_id = "Required.";
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [form]);
+  }, [form, canSkipEmail, noEmail]);
 
   const handleNext = (e) => {
     e.preventDefault();
     if (!validateStep1()) return;
     setErrors({});
-    if (emailOtpStage === "verified") {
+    // Seniors without an email skip the email code.
+    if (emailOtpStage === "verified" || noEmail) {
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
@@ -296,6 +310,14 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep4()) return;
+    const ok = await confirm({
+      title: "Register this patient?",
+      message: noEmail && !form.contact_number
+        ? `${form.full_name || "The patient"} will get a QR code. There is no portal login because there is no email or mobile number.`
+        : `${form.full_name || "The patient"} will get a ManilaCare account and a QR code.`,
+      confirmText: "Yes, register",
+    });
+    if (!ok) return;
     setIsSubmitting(true);
     setSubmitError("");
     try {
@@ -387,56 +409,56 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 sm:p-8">
       {step === 1 ? (
         <>
-          <h1 className="text-2xl sm:text-4xl text-[#000000] text-center mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <h1 className="text-2xl sm:text-3xl text-[#0B3D7A] text-center mb-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
             ManilaCare Registration
           </h1>
-          <p className="text-[#000000] font-semibold mb-6 text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#000000] font-semibold mb-6 text-sm sm:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
             Please fill out the form to register
           </p>
         </>
       ) : step === 2 ? (
         <>
-          <h1 className="text-2xl sm:text-4xl text-[#1B5E20] text-center mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <h1 className="text-2xl sm:text-3xl text-[#0B3D7A] text-center mb-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
             Additional Information
           </h1>
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-            <p className="text-[#1B5E20] font-semibold text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-[#1B5E20] font-semibold text-sm sm:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
               Please fill out the form to register (skip if no data can be provided)
             </p>
-            <p className="text-[#1B5E20] font-semibold text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-[#1B5E20] font-semibold text-sm sm:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
               PhilHealth Information
             </p>
           </div>
         </>
       ) : step === 3 ? (
         <>
-          <h1 className="text-2xl sm:text-4xl text-[#1B5E20] text-center mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <h1 className="text-2xl sm:text-3xl text-[#0B3D7A] text-center mb-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
             Immunization History
           </h1>
-          <p className="text-[#1B5E20] font-semibold mb-6 text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#1B5E20] font-semibold mb-6 text-sm sm:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
             Please fill out the form to register (skip if no data can be provided)
           </p>
         </>
       ) : (
         <>
-          <h1 className="text-2xl sm:text-4xl text-[#1B5E20] text-center mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <h1 className="text-2xl sm:text-3xl text-[#0B3D7A] text-center mb-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
             Newborn and Obstetric (OB) History
           </h1>
-          <p className="text-[#1B5E20] font-semibold mb-6 text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#1B5E20] font-semibold mb-6 text-sm sm:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
             Please fill out the form to register (skip if no data can be provided)
           </p>
         </>
       )}
-      <hr className="border-t border-[#1A1A1A]/60 mb-8" />
+      <hr className="border-t border-[#E3E8EF] mb-8" />
 
       {submitError && (
         <div
           role="alert"
           className="mb-6 rounded-2xl border border-[#C97B63] bg-[#FBEAE5] text-[#8A3B27] text-sm px-4 py-3"
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           {submitError}
         </div>
@@ -445,10 +467,10 @@ export default function RegisterPage() {
       {step === 1 && emailOtpStage === "sent" && (
         <form onSubmit={handleVerifyEmailOtp} className="max-w-md mx-auto">
           <div className="rounded-2xl bg-[#1B5E20] p-8 text-white text-center">
-            <h3 className="text-xl font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
               Verify your email
             </h3>
-            <p className="text-sm text-white/85 mb-6" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-white/85 mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
               We sent a 6-digit code to <span className="font-semibold">{form.email}</span>. Enter it below to continue.
             </p>
 
@@ -460,12 +482,12 @@ export default function RegisterPage() {
               onChange={(e) => setEmailOtp(e.target.value.replace(/[^0-9]/g, ""))}
               placeholder="000000"
               className="w-full rounded-full bg-[#0B3D7A] px-6 py-3.5 text-white placeholder-white/40 text-center text-2xl tracking-[0.5em] outline-none focus:ring-2 focus:ring-white/30 mb-3"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
 
             {emailOtpError && <p className="text-sm text-red-200 mb-3">{emailOtpError}</p>}
 
-            <div className="flex items-center justify-between text-sm mb-6" style={{ fontFamily: "'Lora', serif" }}>
+            <div className="flex items-center justify-between text-sm mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
               <span className="text-white/70">
                 {emailOtpSecondsLeft > 0
                   ? `Code expires in ${Math.floor(emailOtpSecondsLeft / 60)}:${String(emailOtpSecondsLeft % 60).padStart(2, "0")}`
@@ -485,7 +507,7 @@ export default function RegisterPage() {
               type="submit"
               disabled={emailOtpSubmitting}
               className="w-full rounded-full bg-white text-[#1B5E20] py-3.5 font-bold hover:bg-white/90 transition-colors disabled:opacity-60 mb-3"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {emailOtpSubmitting ? "Verifying…" : "Verify Code"}
             </button>
@@ -510,7 +532,7 @@ export default function RegisterPage() {
             <div
               role="alert"
               className="mb-6 rounded-2xl border border-[#C97B63] bg-[#FBEAE5] text-[#8A3B27] text-sm px-4 py-3"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {emailOtpError}
             </div>
@@ -521,7 +543,13 @@ export default function RegisterPage() {
             <PillInput placeholder="CONTACT NUMBER" value={form.contact_number} onChange={handleChange("contact_number")} numericOnly error={errors.contact_number} />
             <PillInput type="date" placeholder="DATE OF BIRTH" value={form.date_of_birth} onChange={handleChange("date_of_birth")} error={errors.date_of_birth} />
 
-            <PillInput type="email" placeholder="EMAIL ADDRESS" value={form.email} onChange={handleChange("email")} error={errors.email} />
+            <PillInput
+              type="email"
+              placeholder={canSkipEmail ? "EMAIL (OPTIONAL, 50+)" : "EMAIL ADDRESS"}
+              value={form.email}
+              onChange={handleChange("email")}
+              error={errors.email}
+            />
             <PillDropdown placeholder="SEX" value={form.sex} onChange={handleSelect("sex")} options={["Male", "Female"]} error={errors.sex} />
             <PillInput placeholder="PLACE OF BIRTH" value={form.place_of_birth} onChange={handleChange("place_of_birth")} />
 
@@ -551,12 +579,24 @@ export default function RegisterPage() {
             <PillInput placeholder="FAMILY NO." value={form.family_number} onChange={handleChange("family_number")} numericOnly />
           </div>
 
+          {noEmail && (
+            <div
+              className="mt-6 rounded-2xl border border-[#0B3D7A]/20 bg-[#E7EEF7] px-4 py-3 text-sm text-[#0B3D7A]"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              <b>No email (age 50+).</b>{" "}
+              {form.contact_number
+                ? `The patient will log in with the mobile number ${form.contact_number} and the password above.`
+                : "Without an email or mobile number, the patient will have no portal login. The QR card still works for check-in."}
+            </div>
+          )}
+
           <div className="flex justify-center mt-10">
             <button
               type="submit"
               disabled={emailOtpSubmitting}
-              className="rounded-full bg-[#1B5E20] text-white px-14 py-4 text-lg tracking-wide hover:bg-[#164D1A] transition-colors disabled:opacity-60"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-[#0B3D7A] text-white px-10 py-3 text-base font-semibold tracking-wide hover:bg-[#0A3468] transition-colors disabled:opacity-60"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {emailOtpSubmitting ? "Sending code…" : "PROCEED"}
             </button>
@@ -578,7 +618,7 @@ export default function RegisterPage() {
                   onChange={() => handleSelect("philhealth_status")(form.philhealth_status === "Member" ? "" : "Member")}
                   className="h-4 w-4 accent-[#1B5E20]"
                 />
-                <span className="text-[#1B5E20] font-semibold text-sm" style={{ fontFamily: "'Lora', serif" }}>Member</span>
+                <span className="text-[#1B5E20] font-semibold text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>Member</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -587,7 +627,7 @@ export default function RegisterPage() {
                   onChange={() => handleSelect("philhealth_status")(form.philhealth_status === "Dependent" ? "" : "Dependent")}
                   className="h-4 w-4 accent-[#1B5E20]"
                 />
-                <span className="text-[#1B5E20] font-semibold text-sm" style={{ fontFamily: "'Lora', serif" }}>Dependent</span>
+                <span className="text-[#1B5E20] font-semibold text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>Dependent</span>
               </label>
             </div>
 
@@ -612,15 +652,15 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={handleBack}
-              className="rounded-full bg-white border-2 border-[#1B5E20] text-[#1B5E20] px-10 py-4 text-lg tracking-wide hover:bg-[#F0F5F0] transition-colors"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-white border border-[#CBD5E1] text-[#3D4653] px-8 py-3 text-base font-semibold tracking-wide hover:bg-[#F4F6F9] transition-colors"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               BACK
             </button>
             <button
               type="submit"
-              className="rounded-full bg-[#1B5E20] text-white px-14 py-4 text-lg tracking-wide hover:bg-[#164D1A] transition-colors"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-[#0B3D7A] text-white px-10 py-3 text-base font-semibold tracking-wide hover:bg-[#0A3468] transition-colors"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               PROCEED
             </button>
@@ -652,7 +692,7 @@ export default function RegisterPage() {
                   onChange={() => setForm((prev) => ({ ...prev, terms_agreed: !prev.terms_agreed }))}
                   className="mt-1 h-4 w-4 accent-[#1B5E20] shrink-0"
                 />
-                <span className="text-sm text-[#1A1A1A] leading-relaxed" style={{ fontFamily: "'Lora', serif" }}>
+                <span className="text-sm text-[#1A1A1A] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
                   I have read and agree to the{" "}
                   <Link
                     to="/terms"
@@ -683,16 +723,16 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={handleBackToStep2}
-              className="rounded-full bg-white border-2 border-[#1B5E20] text-[#1B5E20] px-10 py-4 text-lg tracking-wide hover:bg-[#F0F5F0] transition-colors"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-white border border-[#CBD5E1] text-[#3D4653] px-8 py-3 text-base font-semibold tracking-wide hover:bg-[#F4F6F9] transition-colors"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               BACK
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-full bg-[#1B5E20] text-white px-14 py-4 text-lg tracking-wide hover:bg-[#164D1A] transition-colors disabled:opacity-60"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-[#0B3D7A] text-white px-10 py-3 text-base font-semibold tracking-wide hover:bg-[#0A3468] transition-colors disabled:opacity-60"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {showObHistory ? "PROCEED" : isSubmitting ? "Registering…" : "REGISTER"}
             </button>
@@ -774,7 +814,7 @@ export default function RegisterPage() {
                 onChange={() => setForm((prev) => ({ ...prev, terms_agreed: !prev.terms_agreed }))}
                 className="mt-1 h-4 w-4 accent-[#1B5E20] shrink-0"
               />
-              <span className="text-sm text-[#1A1A1A] leading-relaxed" style={{ fontFamily: "'Lora', serif" }}>
+              <span className="text-sm text-[#1A1A1A] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
                 I have read and agree to the{" "}
                 <Link
                   to="/terms"
@@ -803,16 +843,16 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={handleBackToStep3}
-              className="rounded-full bg-white border-2 border-[#1B5E20] text-[#1B5E20] px-10 py-4 text-lg tracking-wide hover:bg-[#F0F5F0] transition-colors"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-white border border-[#CBD5E1] text-[#3D4653] px-8 py-3 text-base font-semibold tracking-wide hover:bg-[#F4F6F9] transition-colors"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               BACK
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-full bg-[#1B5E20] text-white px-14 py-4 text-lg tracking-wide hover:bg-[#164D1A] transition-colors disabled:opacity-60"
-              style={{ fontFamily: "'Lora', serif" }}
+              className="rounded-full bg-[#0B3D7A] text-white px-10 py-3 text-base font-semibold tracking-wide hover:bg-[#0A3468] transition-colors disabled:opacity-60"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {isSubmitting ? "Registering…" : "REGISTER"}
             </button>
@@ -836,145 +876,101 @@ function PillInput({ placeholder, type = "text", value, onChange, error, numeric
     }
   };
 
+  // The placeholder text is also shown as the field's label above the box.
   return (
-    <div>
-      <div className="relative">
+    <label className="block">
+      <span className="block text-xs font-semibold uppercase tracking-wide text-[#5B6470] mb-1">{placeholder}</span>
+      <span className="relative block">
         <input
           type={numericOnly ? "text" : isPassword ? (showPassword ? "text" : "password") : type}
           value={value}
           onChange={handleInputChange}
-          placeholder={placeholder}
           autoComplete="off"
           inputMode={numericOnly ? "numeric" : undefined}
-          className={`manilacare-pill-input w-full rounded-full border-0 px-6 py-3.5 text-center text-white placeholder-white/90 outline-none bg-[#1B5E20] focus:ring-2 focus:ring-[#0B3D7A]/40 ${
-            isPassword ? "pr-12" : ""
-          } ${error ? "ring-2 ring-red-400" : ""}`}
-          style={{ fontFamily: "'Lora', serif" }}
+          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-[#1A1A1A] outline-none focus:border-[#0B3D7A] focus:ring-2 focus:ring-[#0B3D7A]/20 ${
+            isPassword ? "pr-11" : ""
+          } ${error ? "border-[#B3261E] ring-1 ring-[#B3261E]/30" : "border-[#CBD5E1]"}`}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute right-5 top-1/2 -translate-y-1/2 text-white/90 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5B6470] hover:text-[#0B3D7A]"
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
-      </div>
-      {error && <p className="mt-1 text-xs text-[#8A3B27] text-center">{error}</p>}
-
-      <style>{`
-        input.manilacare-pill-input:-webkit-autofill,
-        input.manilacare-pill-input:-webkit-autofill:hover,
-        input.manilacare-pill-input:-webkit-autofill:focus {
-          -webkit-text-fill-color: #ffffff;
-          -webkit-box-shadow: 0 0 0px 1000px #1B5E20 inset;
-          transition: background-color 9999s ease-in-out 0s;
-        }
-      `}</style>
-    </div>
+      </span>
+      {error && <span className="mt-1 block text-xs text-[#B3261E]">{error}</span>}
+    </label>
   );
 }
 
 function PillDropdown({ placeholder, value, onChange, options, error }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={`w-full rounded-full border-0 px-6 py-3.5 text-center text-white outline-none bg-[#1B5E20] focus:ring-2 focus:ring-[#0B3D7A]/40 flex items-center justify-center gap-2 hover:bg-[#164D1A] transition-colors ${
-          error ? "ring-2 ring-red-400" : ""
-        }`}
-        style={{ fontFamily: "'Lora', serif" }}
-      >
-        <span className={value ? "" : "text-white/90"}>{value || placeholder}</span>
-        <ChevronDown size={16} className={`transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      {open && (
-        <div
-          className="absolute z-20 mt-2 w-full rounded-2xl bg-[#164D1A] shadow-lg overflow-hidden border border-[#0B3D7A]/20"
-          style={{ fontFamily: "'Lora', serif" }}
-        >
-          {options.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => {
-                onChange(opt);
-                setOpen(false);
-              }}
-              className={`w-full text-center px-6 py-3 text-white hover:bg-[#0B3D7A] transition-colors ${
-                opt === value ? "bg-[#0B3D7A]" : ""
-              }`}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {error && <p className="mt-1 text-xs text-[#8A3B27] text-center">{error}</p>}
+    <div>
+      <span className="block text-xs font-semibold uppercase tracking-wide text-[#5B6470] mb-1">{placeholder}</span>
+      <div className={error ? "rounded-lg ring-1 ring-[#B3261E]/40" : ""}>
+        <SearchableSelect
+          rounded="lg"
+          placeholder="Select…"
+          options={options.map((o) => ({ value: o, label: o }))}
+          value={value}
+          onChange={onChange}
+          ariaLabel={placeholder}
+        />
+      </div>
+      {error && <p className="mt-1 text-xs text-[#B3261E]">{error}</p>}
     </div>
   );
 }
 
 function ImmunizationTable({ form, handleChange }) {
+  const dateInput =
+    "w-full rounded-lg border border-[#CBD5E1] bg-white px-2 py-1.5 text-sm text-[#1A1A1A] outline-none focus:border-[#0B3D7A] focus:ring-2 focus:ring-[#0B3D7A]/20";
   return (
-    <div className="overflow-x-auto rounded-2xl border border-[#1B5E20]">
-      <table className="w-full min-w-[640px] border-collapse text-center text-white" style={{ fontFamily: "'Lora', serif" }}>
+    <div className="overflow-x-auto rounded-xl border border-[#E3E8EF]">
+      <table className="w-full min-w-[640px] border-collapse text-left text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
         <thead>
-          <tr className="bg-[#1B5E20]">
-            <th className="border border-white/20 px-4 py-3 font-bold">VACCINE</th>
-            <th className="border border-white/20 px-4 py-3 font-bold">DATE GIVEN</th>
-            <th className="border border-white/20 px-4 py-3 font-bold">VACCINE</th>
-            <th className="border border-white/20 px-4 py-3 font-bold">DATE GIVEN</th>
+          <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
+            <th className="px-4 py-3 font-semibold">Vaccine</th>
+            <th className="px-4 py-3 font-semibold">Date Given</th>
+            <th className="px-4 py-3 font-semibold border-l border-[#E3E8EF]">Vaccine</th>
+            <th className="px-4 py-3 font-semibold">Date Given</th>
           </tr>
         </thead>
         <tbody>
           {IMMUNIZATION_LEFT.map((left, i) => {
             const right = IMMUNIZATION_RIGHT[i];
             return (
-              <tr key={left.key} className="bg-[#1B5E20]">
-                <td className="border border-white/20 px-4 py-3 font-semibold">{left.label}</td>
-                <td className="border border-white/20 px-2 py-2">
+              <tr key={left.key} className="border-t border-[#E3E8EF] text-[#1A1A1A]">
+                <td className="px-4 py-2 font-semibold">{left.label}</td>
+                <td className="px-3 py-2">
                   <input
                     type="date"
                     value={form[`immunization_${left.key}_date`]}
                     onChange={handleChange(`immunization_${left.key}_date`)}
-                    className="w-full bg-transparent text-white text-center outline-none [color-scheme:dark]"
+                    className={dateInput}
                   />
                 </td>
                 {right ? (
                   <>
-                    <td className="border border-white/20 px-4 py-3 font-semibold">{right.label}</td>
-                    <td className="border border-white/20 px-2 py-2">
+                    <td className="px-4 py-2 font-semibold border-l border-[#E3E8EF]">{right.label}</td>
+                    <td className="px-3 py-2">
                       <input
                         type="date"
                         value={form[`immunization_${right.key}_date`]}
                         onChange={handleChange(`immunization_${right.key}_date`)}
-                        className="w-full bg-transparent text-white text-center outline-none [color-scheme:dark]"
+                        className={dateInput}
                       />
                     </td>
                   </>
                 ) : (
                   <>
-                    <td className="border border-white/20" />
-                    <td className="border border-white/20" />
+                    <td className="border-l border-[#E3E8EF]" />
+                    <td />
                   </>
                 )}
               </tr>
@@ -988,8 +984,8 @@ function ImmunizationTable({ form, handleChange }) {
 
 function PillFieldLabel({ label }) {
   return (
-    <div className="flex items-center px-2">
-      <span className="text-[#1B5E20] font-bold text-sm sm:text-base" style={{ fontFamily: "'Lora', serif" }}>
+    <div className="flex items-end px-1 pb-2.5">
+      <span className="text-[#0B3D7A] font-semibold text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
         {label}
       </span>
     </div>
@@ -998,16 +994,18 @@ function PillFieldLabel({ label }) {
 
 function PillToggleGroup({ value, onChange, options }) {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-2">
       {options.map((opt) => (
         <button
           key={opt}
           type="button"
           onClick={() => onChange(value === opt ? "" : opt)}
-          className={`flex-1 rounded-full border-0 px-4 py-3.5 text-center text-white outline-none transition-colors ${
-            value === opt ? "bg-[#0B3D7A]" : "bg-[#1B5E20] hover:bg-[#164D1A]"
+          className={`flex-1 rounded-lg border px-3 py-2.5 text-sm text-center outline-none transition-colors ${
+            value === opt
+              ? "bg-[#0B3D7A] border-[#0B3D7A] text-white font-semibold"
+              : "bg-white border-[#CBD5E1] text-[#1A1A1A] hover:bg-[#F4F6F9]"
           }`}
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           {opt}
         </button>

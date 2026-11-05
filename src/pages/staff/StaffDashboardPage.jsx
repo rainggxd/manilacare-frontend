@@ -5,6 +5,8 @@ import axios from "axios";
 import OutbreakAlert from "../../components/OutbreakAlert";
 import AppointmentCalendar from "../../components/AppointmentCalendar";
 import { localISO, toLocalISO } from "../../utils/dates";
+import { portalBase } from "../../utils/portal";
+import { useConfirm } from "../../components/ConfirmDialog";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -15,15 +17,15 @@ function todayISO() {
 
 function StatCard({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 flex items-center gap-4">
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 flex items-center gap-4">
       <div className="rounded-full bg-[#0B3D7A]/10 p-3">
         <Icon size={22} className="text-[#0B3D7A]" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <p className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {value}
         </p>
-        <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {label}
         </p>
       </div>
@@ -32,6 +34,7 @@ function StatCard({ icon: Icon, label, value }) {
 }
 
 export default function StaffDashboardPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const navigate = useNavigate();
   const user = auth?.user;
@@ -87,6 +90,13 @@ export default function StaffDashboardPage() {
   const waitingCount = waitingQueue.length;
 
   async function handleCallNext() {
+    const next = waitingQueue[0];
+    const ok = await confirm({
+      title: "Call the next patient?",
+      message: next ? `Queue no. ${next.queue_number}${next.patient_name ? ` - ${next.patient_name}` : ""}` : "",
+      confirmText: "Yes, call next",
+    });
+    if (!ok) return;
     setIsCalling(true);
     setCallError("");
     try {
@@ -101,7 +111,7 @@ export default function StaffDashboardPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Welcome, {user?.full_name ?? "Staff"}!
       </h2>
 
@@ -114,23 +124,23 @@ export default function StaffDashboardPage() {
       </div>
 
       {/* Queue calling panel */}
-      <div className="rounded-2xl bg-[#1B5E20] text-white p-6 mb-8">
+      <div className="rounded-2xl bg-gradient-to-r from-[#0B3D7A] to-[#14539E] text-white p-6 mb-8 shadow-sm">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <p className="text-xs text-white/70 uppercase tracking-wider mb-1" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-xs text-white/70 uppercase tracking-wider mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
               Now Serving
             </p>
             {nowServing ? (
               <div>
-                <p className="text-4xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <p className="text-4xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
                   Queue #{nowServing.queue_number ?? "—"}
                 </p>
-                <p className="text-white/85 mt-1" style={{ fontFamily: "'Lora', serif" }}>
+                <p className="text-white/85 mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {nowServing.patient_name}
                 </p>
               </div>
             ) : (
-              <p className="text-2xl font-bold text-white/60" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <p className="text-2xl font-bold text-white/60" style={{ fontFamily: "'Inter', sans-serif" }}>
                 No patient currently serving
               </p>
             )}
@@ -140,8 +150,8 @@ export default function StaffDashboardPage() {
             type="button"
             onClick={handleCallNext}
             disabled={isCalling || waitingCount === 0}
-            className="inline-flex items-center gap-2 rounded-full bg-white text-[#1B5E20] px-6 py-3 text-sm font-bold hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Lora', serif" }}
+            className="inline-flex items-center gap-2 rounded-full bg-white text-[#0B3D7A] px-6 py-3 text-sm font-bold hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {isCalling ? <Loader2 size={16} className="animate-spin" /> : <PhoneCall size={16} />}
             {isCalling ? "Calling…" : "Call Next Patient"}
@@ -149,14 +159,14 @@ export default function StaffDashboardPage() {
         </div>
 
         {callError && (
-          <p className="text-sm text-red-200 mt-3" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-sm text-[#B3261E] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
             {callError}
           </p>
         )}
 
         {waitingCount > 0 && (
           <div className="mt-5 pt-4 border-t border-white/15">
-            <p className="text-xs text-white/70 uppercase tracking-wider mb-2" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-xs text-white/70 uppercase tracking-wider mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
               Waiting in Queue ({waitingCount})
             </p>
             <div className="flex flex-wrap gap-2">
@@ -164,13 +174,13 @@ export default function StaffDashboardPage() {
                 <span
                   key={v.id}
                   className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   #{v.queue_number ?? "—"} {v.patient_name}
                 </span>
               ))}
               {waitingCount > 10 && (
-                <span className="rounded-full bg-white/10 px-4 py-1.5 text-sm text-white/70" style={{ fontFamily: "'Lora', serif" }}>
+                <span className="rounded-full bg-white/10 px-4 py-1.5 text-sm text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>
                   +{waitingCount - 10} more
                 </span>
               )}
@@ -180,14 +190,14 @@ export default function StaffDashboardPage() {
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-        <h3 className="text-xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h3 className="text-xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           Appointment Calendar
         </h3>
         <button
           type="button"
-          onClick={() => navigate("/staff/check-in")}
+          onClick={() => navigate(`${portalBase(user?.role)}/check-in`)}
           className="rounded-full bg-[#0B3D7A] text-white px-5 py-2 text-sm font-semibold hover:bg-[#0A3468] transition-colors"
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           Go to Check-In
         </button>

@@ -24,7 +24,8 @@ import manilaLogo from "../../assets/MANILA_LOGO_CAPSTONE.jpg";
 import mhdLogo from "../../assets/MHD_LOGO.jpg";
 import HeroCarousel from "../../components/landing/HeroCarousel";
 import AnnouncementModal from "../../components/landing/AnnouncementModal";
-import { ANNOUNCEMENT_CATEGORIES, categoryStyle, excerpt, formatPostDate } from "../../utils/announcements";
+import AnnouncementCarousel from "../../components/landing/AnnouncementCarousel";
+import { ANNOUNCEMENT_CATEGORIES, categoryStyle, excerpt } from "../../utils/announcements";
 import {
   KALINGA_TITLE,
   KALINGA_TAGLINE,
@@ -62,7 +63,6 @@ const NAV_LINKS = [
   { href: "#contact", label: "Contact Us" },
 ];
 
-const ANNOUNCEMENTS_SHOWN = 6;
 
 export default function LandingPage() {
   const location = useLocation();
@@ -70,7 +70,6 @@ export default function LandingPage() {
   const [alerts, setAlerts] = useState({ window_days: 30, alerts: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState("All");
-  const [showAll, setShowAll] = useState(false);
   const [openPost, setOpenPost] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -107,7 +106,6 @@ export default function LandingPage() {
     () => (filter === "All" ? notices : notices.filter((p) => p.category === filter)),
     [notices, filter]
   );
-  const visibleNotices = showAll ? filteredNotices : filteredNotices.slice(0, ANNOUNCEMENTS_SHOWN);
 
   const closeModal = useCallback(() => setOpenPost(null), []);
 
@@ -119,7 +117,7 @@ export default function LandingPage() {
   });
 
   return (
-    <div id="home" className="min-h-screen w-full bg-white flex flex-col" style={{ fontFamily: "'Lora', serif" }}>
+    <div id="home" className="min-h-screen w-full bg-white flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* 1. Government strip */}
       <div className="bg-[#072B57] text-white/80 text-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-1.5 flex items-center justify-between gap-3">
@@ -138,7 +136,7 @@ export default function LandingPage() {
               <p className="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-[#5B6470]">Manila Health Department</p>
               <p
                 className="text-2xl sm:text-3xl text-[#0B3D7A] leading-tight"
-                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+                style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
               >
                 ManilaCare
               </p>
@@ -239,10 +237,7 @@ export default function LandingPage() {
                 type="button"
                 role="tab"
                 aria-selected={filter === value}
-                onClick={() => {
-                  setFilter(value);
-                  setShowAll(false);
-                }}
+                onClick={() => setFilter(value)}
                 className={`rounded-full px-4 py-1.5 text-sm border transition-colors ${
                   filter === value
                     ? "bg-[#0B3D7A] text-white border-[#0B3D7A]"
@@ -256,28 +251,12 @@ export default function LandingPage() {
 
           {isLoading ? (
             <p className="text-center text-sm text-[#8A8578]">Loading announcements…</p>
-          ) : visibleNotices.length === 0 ? (
+          ) : filteredNotices.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[#0B3D7A]/25 p-10 text-center text-[#5B6470]">
               No announcements right now. Please check again soon.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {visibleNotices.map((post) => (
-                <PostCard key={post.id} post={post} onOpen={() => setOpenPost(post)} />
-              ))}
-            </div>
-          )}
-
-          {filteredNotices.length > ANNOUNCEMENTS_SHOWN && (
-            <div className="text-center mt-8">
-              <button
-                type="button"
-                onClick={() => setShowAll((v) => !v)}
-                className="rounded-full border border-[#0B3D7A]/30 px-6 py-2.5 text-sm font-semibold text-[#0B3D7A] hover:bg-[#0B3D7A]/5"
-              >
-                {showAll ? "Show fewer" : `Show all ${filteredNotices.length} announcements`}
-              </button>
-            </div>
+            <AnnouncementCarousel posts={filteredNotices} onOpen={setOpenPost} />
           )}
         </div>
       </section>
@@ -300,7 +279,7 @@ export default function LandingPage() {
                   <div className="rounded-full bg-[#1B5E20]/10 p-3 w-fit mb-4">
                     <HeartPulse size={22} className="text-[#1B5E20]" />
                   </div>
-                  <p className="text-lg text-[#1A1A1A] mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                  <p className="text-lg text-[#1A1A1A] mb-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
                     {tip.title}
                   </p>
                   <p className="text-sm text-[#5B6470] leading-relaxed mb-3">{excerpt(tip.body, 120)}</p>
@@ -338,7 +317,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {HEALTH_CENTER_INFO.map((hc) => (
               <div key={hc.name} className="rounded-2xl bg-[#1B5E20] text-white p-6">
-                <p className="text-xl font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <p className="text-xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {hc.name}
                 </p>
                 <p className="text-white/85 text-sm leading-relaxed mb-4">{hc.about}</p>
@@ -370,7 +349,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {HEALTH_CENTER_INFO.map((hc) => (
               <div key={hc.name} className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-                <p className="text-xl font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <p className="text-xl font-bold text-[#1B5E20] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {hc.name}
                 </p>
                 <ul className="flex flex-col gap-3 text-sm text-[#1A1A1A]">
@@ -410,7 +389,7 @@ export default function LandingPage() {
               <img src={manilaLogo} alt="" className="h-10 w-10 rounded-full object-cover" />
               <img src={mhdLogo} alt="" className="h-10 w-10 rounded-full object-cover" />
             </div>
-            <p className="text-white font-bold text-lg" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <p className="text-white font-bold text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
               ManilaCare
             </p>
             <p>Manila Health Department · {KALINGA_TITLE}</p>
@@ -464,7 +443,7 @@ function SectionTitle({ eyebrow, title }) {
   return (
     <div className="text-center mb-8">
       <p className="text-xs uppercase tracking-[0.2em] text-[#1B5E20] mb-2">{eyebrow}</p>
-      <h2 className="text-3xl sm:text-4xl text-[#0B3D7A]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+      <h2 className="text-3xl sm:text-4xl text-[#0B3D7A]" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
         {title}
       </h2>
       <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-[#1B5E20]" />
@@ -479,13 +458,13 @@ function QuickLink({ to, href, icon: Icon, title, text }) {
         <Icon size={20} className="text-[#0B3D7A]" />
       </span>
       <span className="min-w-0">
-        <span className="block font-bold text-[#1A1A1A] text-sm sm:text-base">{title}</span>
-        <span className="block text-xs text-[#5B6470]">{text}</span>
+        <span className="block font-bold text-[#1A1A1A] text-sm sm:text-base leading-snug break-words">{title}</span>
+        <span className="block text-xs text-[#5B6470] break-words">{text}</span>
       </span>
     </>
   );
   const className =
-    "flex items-center gap-3 rounded-2xl bg-white border border-[#0B3D7A]/10 p-4 shadow-sm hover:shadow-md hover:border-[#0B3D7A]/30 transition-all";
+    "flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 rounded-2xl bg-white border border-[#0B3D7A]/10 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-[#0B3D7A]/30 transition-all min-w-0 overflow-hidden";
   return to ? (
     <Link to={to} className={className}>
       {content}
@@ -497,41 +476,6 @@ function QuickLink({ to, href, icon: Icon, title, text }) {
   );
 }
 
-function PostCard({ post, onOpen }) {
-  const style = categoryStyle(post.category);
-  const Icon = style.icon;
-  return (
-    <article className="flex flex-col rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-      <div className="h-1.5" style={{ backgroundColor: style.color }} />
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold"
-            style={{ backgroundColor: style.soft, color: style.color }}
-          >
-            <Icon size={13} />
-            {style.label}
-          </span>
-          <span className="text-xs text-[#8A8578]">{formatPostDate(post.publish_date)}</span>
-        </div>
-        <h3 className="text-lg text-[#1A1A1A] leading-snug mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-          {post.title}
-        </h3>
-        <p className="text-sm text-[#5B6470] leading-relaxed mb-4 flex-1">{excerpt(post.body)}</p>
-        <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1 text-xs text-[#5B6470]">
-            <MapPin size={12} />
-            {post.center_name || "All health centers"}
-          </span>
-          <button type="button" onClick={onOpen} className="inline-flex items-center gap-1 text-sm font-semibold text-[#0B3D7A] hover:underline">
-            Read more <ChevronRight size={15} />
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 function InfoCard({ icon: Icon, title, text }) {
   return (
     <div className="h-full rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 sm:p-8">
@@ -539,7 +483,7 @@ function InfoCard({ icon: Icon, title, text }) {
         <div className="rounded-full bg-[#0B3D7A]/10 p-3">
           <Icon size={22} className="text-[#0B3D7A]" />
         </div>
-        <h3 className="text-2xl text-[#1B5E20]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        <h3 className="text-2xl text-[#1B5E20]" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
           {title}
         </h3>
       </div>

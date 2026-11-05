@@ -12,19 +12,19 @@ const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:808
 
 function StatCard({ icon: Icon, label, value, note }) {
   return (
-    <div className="rounded-2xl bg-[#1B5E20] text-white p-5 flex items-center gap-4">
-      <div className="rounded-full bg-white/15 p-3 shrink-0">
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-5 flex items-center gap-4">
+      <div className="rounded-xl bg-[#0B3D7A]/10 text-[#0B3D7A] p-3 shrink-0">
         <Icon size={22} />
       </div>
       <div>
-        <p className="text-2xl font-bold leading-none" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <p className="text-2xl font-bold leading-none text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
           {value}
         </p>
-        <p className="text-xs text-white/80 mt-1" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-xs text-[#5B6470] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
           {label}
         </p>
         {note && (
-          <p className="text-[10px] text-white/50 mt-0.5" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[10px] text-[#8A94A6] mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
             {note}
           </p>
         )}
@@ -51,7 +51,7 @@ function BarChart({ bars, height = 180 }) {
           <div key={b.label} className="flex-1 min-w-0 flex flex-col items-center justify-end h-full">
             <span
               className="text-sm font-bold text-[#1A1A1A] mb-1"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {b.value}
             </span>
@@ -65,7 +65,7 @@ function BarChart({ bars, height = 180 }) {
             />
             <span
               className="mt-2 text-[11px] text-[#5B6470] text-center truncate w-full"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {b.label}
             </span>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
           Welcome, {user?.full_name ?? "User"}!
         </h2>
       </div>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
       <OutbreakAlert auth={auth} showTable />
 
       {loadError && (
-        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-sm text-[#8A3B27] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           {loadError}
         </p>
       )}
@@ -201,30 +201,30 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Daily Appointments (Last 7 Days)
           </h3>
           {isLoading ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
           ) : (
             <BarChart bars={dailyAppointmentBars} />
           )}
         </div>
 
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Appointment Status
           </h3>
           {isLoading ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
           ) : (
             <BarChart bars={appointmentStatusBars} />
           )}
         </div>
       </div>
 
-      <h3 className="text-xl font-bold text-[#000000] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h3 className="text-xl font-bold text-[#000000] mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
         Appointment Calendar
       </h3>
       <div className="mb-8">
@@ -232,38 +232,38 @@ export default function DashboardPage() {
       </div>
 
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xl font-bold text-[#000000]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h3 className="text-xl font-bold text-[#000000]" style={{ fontFamily: "'Inter', sans-serif" }}>
           Recently Registered
         </h3>
         <button
           type="button"
           onClick={() => navigate("/dashboard/records")}
           className="text-sm font-semibold text-[#0B3D7A] hover:underline"
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           View all records →
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-[#0B3D7A]/20">
-        <table className="w-full min-w-[640px] border-collapse text-left" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="overflow-x-auto rounded-2xl border border-[#E3E8EF] bg-white shadow-sm">
+        <table className="w-full min-w-[640px] border-collapse text-left" style={{ fontFamily: "'Inter', sans-serif" }}>
           <thead>
-            <tr className="bg-[#0B3D7A] text-white">
-              <th className="px-4 py-3 font-bold">Patient</th>
-              <th className="px-4 py-3 font-bold">Health Center</th>
-              <th className="px-4 py-3 font-bold">Age</th>
-              <th className="px-4 py-3 font-bold">Sex</th>
-              <th className="px-4 py-3 font-bold">Registered</th>
+            <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
+              <th className="px-4 py-3 font-semibold">Patient</th>
+              <th className="px-4 py-3 font-semibold">Health Center</th>
+              <th className="px-4 py-3 font-semibold">Age</th>
+              <th className="px-4 py-3 font-semibold">Sex</th>
+              <th className="px-4 py-3 font-semibold">Registered</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={5} className="px-4 py-6 text-center">Loading…</td>
               </tr>
             )}
             {!isLoading && !loadError && recentPatients.length === 0 && (
-              <tr className="bg-[#1B5E20] text-white">
+              <tr className="bg-white text-[#5B6470]">
                 <td colSpan={5} className="px-4 py-6 text-center">No patient records yet.</td>
               </tr>
             )}
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                 <tr
                   key={p.id}
                   onClick={() => navigate(`/dashboard/records/${p.id}`)}
-                  className="bg-[#1B5E20] text-white border-t border-white/10 cursor-pointer hover:bg-[#164D1A] transition-colors"
+                  className="bg-white text-[#1A1A1A] border-t border-[#E3E8EF] cursor-pointer hover:bg-[#F4F6F9] transition-colors"
                 >
                   <td className="px-4 py-3">{p.full_name}</td>
                   <td className="px-4 py-3">{healthCenterName(p.health_center_id)}</td>

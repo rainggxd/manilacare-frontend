@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ClipboardList, Pencil } from "lucide-react";
 import axios from "axios";
+import { useConfirm } from "./ConfirmDialog";
+import SearchableSelect from "./SearchableSelect";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -17,7 +19,8 @@ const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:808
 
 const FIELDS = [
   { key: "occupation", label: "Occupation", wide: false },
-  { key: "allergies", label: "Allergies", wide: false },
+  { key: "blood_type", label: "Blood Type", wide: false, options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"] },
+  { key: "allergies", label: "Allergies", wide: true },
   { key: "family_history", label: "Family History", wide: true, hint: "e.g. Hypertension (father), Diabetes (mother)" },
   { key: "past_illnesses", label: "Past Illnesses", wide: true, hint: "e.g. Asthma, Tuberculosis (2019)" },
   { key: "past_surgeries", label: "Past Surgeries / Hospitalizations", wide: true },
@@ -27,6 +30,7 @@ const FIELDS = [
 const EDITOR_ROLES = ["Admin", "Staff", "Doctor"];
 
 export default function MedicalBackgroundCard({ patient, auth, onSaved }) {
+  const confirm = useConfirm();
   const canEdit = EDITOR_ROLES.includes(auth?.user?.role);
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -47,6 +51,8 @@ export default function MedicalBackgroundCard({ patient, auth, onSaved }) {
 
   async function handleSave(e) {
     e.preventDefault();
+    const ok = await confirm({ title: "Save the medical background?", message: `Changes will be saved to the record of ${patient.full_name ?? "this patient"}.`, confirmText: "Yes, save" });
+    if (!ok) return;
     setIsSaving(true);
     setError("");
     try {
@@ -63,11 +69,11 @@ export default function MedicalBackgroundCard({ patient, auth, onSaved }) {
   }
 
   return (
-    <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 mb-6" style={{ fontFamily: "'Lora', serif" }}>
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <ClipboardList size={18} className="text-[#0B3D7A]" />
-          <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
             Background and Medical History
           </h3>
         </div>
@@ -88,7 +94,15 @@ export default function MedicalBackgroundCard({ patient, auth, onSaved }) {
           {FIELDS.map((f) => (
             <div key={f.key} className={f.wide ? "sm:col-span-2" : ""}>
               <label className="block text-xs text-[#5B6470] mb-1">{f.label}</label>
-              {f.wide ? (
+              {f.options ? (
+                <SearchableSelect
+                  emptyLabel="Not set"
+                  options={f.options.map((o) => ({ value: o, label: o === "Unknown" ? "---" : o }))}
+                  value={form[f.key]}
+                  onChange={(v) => setForm((prev) => ({ ...prev, [f.key]: v }))}
+                  ariaLabel={f.label}
+                />
+              ) : f.wide ? (
                 <textarea
                   rows={2}
                   value={form[f.key]}
@@ -132,7 +146,7 @@ export default function MedicalBackgroundCard({ patient, auth, onSaved }) {
           {FIELDS.map((f) => (
             <div key={f.key} className={f.wide ? "sm:col-span-2" : ""}>
               <dt className="text-[#8A8578] text-xs uppercase tracking-wide">{f.label}</dt>
-              <dd className="text-[#1A1A1A] font-semibold whitespace-pre-line">{patient[f.key] || "—"}</dd>
+              <dd className="text-[#1A1A1A] font-semibold whitespace-pre-line">{patient[f.key] === "Unknown" ? "---" : patient[f.key] || "—"}</dd>
             </div>
           ))}
         </dl>

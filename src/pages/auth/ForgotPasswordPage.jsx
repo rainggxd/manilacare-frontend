@@ -156,11 +156,11 @@ export default function ForgotPasswordPage() {
       <div className="lg:w-[38%] bg-[#0B3D7A] text-white flex flex-col justify-center px-8 sm:px-14 py-16">
         <div className="flex items-center gap-3 mb-2">
           <img src={manilaLogo} alt="Lungsod ng Maynila seal" className="w-12 h-12 rounded-full object-cover" />
-          <span className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <span className="text-2xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
             ManilaCare
           </span>
         </div>
-        <p className="text-white/70 text-sm mb-12" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-white/70 text-sm mb-12" style={{ fontFamily: "'Inter', sans-serif" }}>
           Community Health Information System
         </p>
 
@@ -183,7 +183,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <span
                   className={`text-base ${isActive ? "font-bold text-white" : "text-white/60"}`}
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {s.label}
                 </span>
@@ -200,7 +200,7 @@ export default function ForgotPasswordPage() {
             <div
               role="alert"
               className="mb-5 rounded-2xl border border-[#C97B63] bg-[#FBEAE5] text-[#8A3B27] text-sm px-4 py-3"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {error}
             </div>
@@ -208,11 +208,14 @@ export default function ForgotPasswordPage() {
 
           {step === 1 && (
             <form onSubmit={handleSendCode}>
-              <h2 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Forgot your password?
               </h2>
-              <p className="text-white/80 text-sm mb-6" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-white/80 text-sm mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Enter your registered email address. We'll send a one-time code to reset your password.
+              </p>
+              <p className="text-white/80 text-xs -mt-4 mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+                No email? If you log in with your mobile number, please ask your health center to help reset your password.
               </p>
 
               <label className="block text-xs text-white/80 mb-1">Email Address</label>
@@ -222,14 +225,14 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-full bg-[#0B3D7A] px-6 py-3.5 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-white/30 mb-6"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               />
 
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full rounded-full bg-white text-[#1B5E20] py-3.5 font-bold hover:bg-white/90 transition-colors disabled:opacity-60"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {isSubmitting ? "Sending…" : "Send reset code"}
               </button>
@@ -244,10 +247,10 @@ export default function ForgotPasswordPage() {
 
           {step === 2 && (
             <form onSubmit={handleVerifyOtp}>
-              <h2 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Verify your code
               </h2>
-              <p className="text-white/80 text-sm mb-6" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-white/80 text-sm mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
                 We sent a 6-digit code to <span className="font-semibold text-white">{email}</span>. Enter it below to continue.
               </p>
 
@@ -260,10 +263,10 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
                 placeholder="000000"
                 className="w-full rounded-full bg-[#0B3D7A] px-6 py-3.5 text-white placeholder-white/40 text-center text-2xl tracking-[0.5em] outline-none focus:ring-2 focus:ring-white/30 mb-3"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               />
 
-              <div className="flex items-center justify-between text-sm mb-6" style={{ fontFamily: "'Lora', serif" }}>
+              <div className="flex items-center justify-between text-sm mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
                 <span className="text-white/70">
                   {secondsLeft > 0 ? `Code expires in ${formatTime(secondsLeft)}` : "Code expired"}
                 </span>
@@ -281,7 +284,7 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full rounded-full bg-white text-[#1B5E20] py-3.5 font-bold hover:bg-white/90 transition-colors disabled:opacity-60"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {isSubmitting ? "Verifying…" : "Verify Code"}
               </button>
@@ -300,10 +303,10 @@ export default function ForgotPasswordPage() {
 
           {step === 3 && (
             <form onSubmit={handleResetPassword}>
-              <h2 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Create new password
               </h2>
-              <p className="text-white/80 text-sm mb-6" style={{ fontFamily: "'Lora', serif" }}>
+              <p className="text-white/80 text-sm mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Your new password must be at least 8 characters and include a number and a special character.
               </p>
 
@@ -314,7 +317,7 @@ export default function ForgotPasswordPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full rounded-full bg-[#0B3D7A] px-6 py-3.5 pr-12 text-white outline-none focus:ring-2 focus:ring-white/30"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 />
                 <button
                   type="button"
@@ -330,7 +333,7 @@ export default function ForgotPasswordPage() {
                   <div className="w-full h-1.5 rounded-full bg-white/15 overflow-hidden">
                     <div className={`h-full ${strength.color} transition-all`} style={{ width: `${strength.pct}%` }} />
                   </div>
-                  <p className="text-xs text-white/70 mt-1" style={{ fontFamily: "'Lora', serif" }}>
+                  <p className="text-xs text-white/70 mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Password strength: {strength.label}
                   </p>
                 </div>
@@ -342,14 +345,14 @@ export default function ForgotPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full rounded-full bg-[#0B3D7A] px-6 py-3.5 text-white outline-none focus:ring-2 focus:ring-white/30 mb-6"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               />
 
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full rounded-full bg-white text-[#1B5E20] py-3.5 font-bold hover:bg-white/90 transition-colors disabled:opacity-60"
-                style={{ fontFamily: "'Lora', serif" }}
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {isSubmitting ? "Resetting…" : "Reset Password"}
               </button>

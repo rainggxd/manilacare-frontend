@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import axios from "axios";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 import { Link, useLocation } from "react-router-dom";
 import backgroundImg from "../../assets/BACKGROUND_CAPSTONE.jpg";
@@ -40,10 +40,13 @@ const location = useLocation();
 const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(location.state?.registered));
   const validate = useCallback(() => {
     const errors = {};
-    if (!email.trim()) {
-      errors.email = "Email is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "Enter a valid email address.";
+    // The box takes an email, or a mobile number (patients aged 50+ without an email).
+    const value = email.trim();
+    const isMobile = /^09\d{9}$/.test(value.replace(/[\s-]/g, ""));
+    if (!value) {
+      errors.email = "Email or mobile number is required.";
+    } else if (!isMobile && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      errors.email = "Enter a valid email, or an 11-digit mobile number starting with 09.";
     }
     if (!password) {
       errors.password = "Password is required.";
@@ -67,10 +70,13 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
       onLoginSuccess?.({ token, user });
     } catch (err) {
       const status = err?.response?.status;
-      if (status === 401 || status === 404) {
-        setErrorMessage("Invalid email or password.");
+      if (status === 403 && err.response?.data?.message) {
+        // Self-registered patient still waiting for (or refused) Admin approval
+        setErrorMessage(err.response.data.message);
+      } else if (status === 401 || status === 404) {
+        setErrorMessage("Invalid email, mobile number or password.");
       } else if (status === 429) {
-        setErrorMessage("Too many attempts. Please wait a moment and try again.");
+        setErrorMessage(err.response?.data?.message || "Too many attempts. Please wait a moment and try again.");
       } else {
         setErrorMessage("Unable to sign in right now. Please try again.");
       }
@@ -91,27 +97,18 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
           />
           <span
             className="text-white text-lg sm:text-2xl"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             ManilaCare
           </span>
         </Link>
-        <nav className="flex items-center gap-4 sm:gap-8">
-          <Link
-            to="/#about"
-            className="text-white/90 hover:text-white text-sm sm:text-lg"
-            style={{ fontFamily: "'Lora', serif" }}
-          >
-            About us
-          </Link>
-          <Link
-            to="/#contact"
-            className="text-white/90 hover:text-white text-sm sm:text-lg"
-            style={{ fontFamily: "'Lora', serif" }}
-          >
-            Contact Us
-          </Link>
-        </nav>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 rounded-full border border-white/60 px-4 py-2 text-white text-sm sm:text-base font-semibold hover:bg-white/10"
+        >
+          <ArrowLeft size={18} aria-hidden="true" />
+          Back
+        </Link>
       </header>
 
       {/* Body with faded background photo at the bottom */}
@@ -126,7 +123,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
       >
         <h1
           className="text-3xl sm:text-5xl md:text-6xl text-[#1B5E20] text-center mb-8 sm:mb-12 md:mb-16 leading-tight"
-          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+          style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
         >
           Welcome to ManilaCare
         </h1>
@@ -135,7 +132,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
           <div
             role="status"
             className="mb-5 w-full max-w-md rounded-2xl border border-[#1B5E20]/40 bg-[#EAF6EC] text-[#1B5E20] text-sm px-4 py-3 text-center flex items-center justify-between gap-3"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <span>Registered successfully! You can now log in.</span>
             <button
@@ -153,7 +150,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
           <div
             role="alert"
             className="mb-5 w-full max-w-md rounded-2xl border border-[#C97B63] bg-[#FBEAE5] text-[#8A3B27] text-sm px-4 py-3 text-center"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {errorMessage}
           </div>
@@ -163,17 +160,18 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
           <div className="w-full mb-4">
             <input
               id="email"
-              type="email"
+              type="text"
+              inputMode="email"
               autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-invalid={Boolean(fieldErrors.email)}
-              aria-label="Name / Email"
-              placeholder="NAME"
+              aria-label="Email or mobile number"
+              placeholder="EMAIL OR MOBILE NUMBER"
               className={`w-full rounded-full border-0 px-5 sm:px-6 py-3.5 sm:py-4 text-center text-base sm:text-lg tracking-wide text-white placeholder-white/90 outline-none
                 bg-[#1B5E20] focus:ring-2 focus:ring-[#0B3D7A]/40
                 ${fieldErrors.email ? "ring-2 ring-red-400" : ""}`}
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
             {fieldErrors.email && (
               <p className="mt-1.5 text-xs text-[#8A3B27] text-center">{fieldErrors.email}</p>
@@ -193,7 +191,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
               className={`w-full rounded-full border-0 px-5 sm:px-6 py-3.5 sm:py-4 pr-14 text-center text-base sm:text-lg tracking-wide text-white placeholder-white/90 outline-none
                 bg-[#1B5E20] focus:ring-2 focus:ring-[#0B3D7A]/40
                 ${fieldErrors.password ? "ring-2 ring-red-400" : ""}`}
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
             <button
               type="button"
@@ -210,7 +208,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
 
                    <p
             className="text-[#1B5E20] text-sm mb-8 text-center"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             Forgot Password?{" "}
             <Link to="/forgot-password" className="text-[#0B3D7A] font-semibold hover:underline">
@@ -222,16 +220,23 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
             disabled={isSubmitting}
             className="w-full max-w-sm rounded-full bg-[#4B4F58] text-white py-3.5 sm:py-4 text-base sm:text-lg tracking-wide
               transition-colors hover:bg-[#3C3F47] disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {isSubmitting ? "Signing in…" : "LOGIN"}
           </button>
+
+          <p className="mt-6 text-base sm:text-lg text-[#1A1A1A] text-center">
+            New patient?{" "}
+            <Link to="/register" className="text-[#0B3D7A] font-bold underline underline-offset-4 hover:text-[#1B5E20]">
+              Register here
+            </Link>
+          </p>
 
           <div className="mt-6 rounded-full bg-white/90 border border-[#1B5E20]/20 px-5 py-2 shadow-sm inline-flex items-center gap-2">
             <Link
               to="/terms"
               className="text-[#0B3D7A] text-sm font-bold underline underline-offset-2 hover:text-[#1B5E20]"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               Terms and Conditions
             </Link>
@@ -239,7 +244,7 @@ const [showRegisteredMessage, setShowRegisteredMessage] = useState(Boolean(locat
             <Link
               to="/privacy"
               className="text-[#0B3D7A] text-sm font-bold underline underline-offset-2 hover:text-[#1B5E20]"
-              style={{ fontFamily: "'Lora', serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               Privacy Policy
             </Link>

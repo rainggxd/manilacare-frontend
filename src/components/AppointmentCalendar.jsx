@@ -79,9 +79,9 @@ export default function AppointmentCalendar({ appointments = [], isLoading = fal
   const monthTitle = viewMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-5 gap-5" style={{ fontFamily: "'Lora', serif" }}>
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-5" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Calendar */}
-      <div className="xl:col-span-2 rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-5">
+      <div className="xl:col-span-2 rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
@@ -92,7 +92,7 @@ export default function AppointmentCalendar({ appointments = [], isLoading = fal
             <ChevronLeft size={18} />
           </button>
           <div className="text-center">
-            <p className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <p className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {monthTitle}
             </p>
             <button type="button" onClick={goToToday} className="text-xs text-[#0B3D7A] font-semibold hover:underline">
@@ -152,10 +152,10 @@ export default function AppointmentCalendar({ appointments = [], isLoading = fal
       </div>
 
       {/* Per-day log */}
-      <div className="xl:col-span-3 rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-5">
+      <div className="xl:col-span-3 rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-5">
         <div className="flex items-center gap-2 mb-1">
           <CalendarDays size={20} className="text-[#0B3D7A]" />
-          <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="text-lg font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
             Appointment Log: {formatLongDate(selectedDate)}
           </h3>
         </div>
@@ -174,10 +174,10 @@ export default function AppointmentCalendar({ appointments = [], isLoading = fal
         ) : dayLog.length === 0 ? (
           <p className="text-sm text-[#8A8578] py-6 text-center">No appointments on this day.</p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-[#0B3D7A]/10">
+          <div className="overflow-x-auto rounded-xl border border-[#E3E8EF]">
             <table className="w-full min-w-[620px] border-collapse text-left text-sm">
               <thead>
-                <tr className="bg-[#0B3D7A] text-white">
+                <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
                   <th className="px-3 py-2 font-bold">Time</th>
                   <th className="px-3 py-2 font-bold">Patient</th>
                   <th className="px-3 py-2 font-bold">Doctor</th>
@@ -188,7 +188,7 @@ export default function AppointmentCalendar({ appointments = [], isLoading = fal
               </thead>
               <tbody>
                 {dayLog.map((a) => (
-                  <tr key={a.id} className="border-t border-[#0B3D7A]/10">
+                  <tr key={a.id} className="border-t border-[#E3E8EF]">
                     <td className="px-3 py-2 whitespace-nowrap">{formatTime(a.appointment_time)}</td>
                     <td className="px-3 py-2 font-semibold">{a.patient_name || "—"}</td>
                     <td className="px-3 py-2">{a.doctor_name ? `Dr. ${a.doctor_name}` : "—"}</td>

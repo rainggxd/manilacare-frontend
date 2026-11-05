@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
-import { Search, Trash2, ArrowLeft, ArrowUpDown } from "lucide-react";
+import { Search, Trash2, ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { healthCenterName } from "../../../utils/healthCenters";
+import { useConfirm } from "../../../components/ConfirmDialog";
 
 const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 
 export default function PatientRecordsPage() {
+  const confirm = useConfirm();
   const { auth } = useOutletContext();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,9 +19,7 @@ export default function PatientRecordsPage() {
   const [loadError, setLoadError] = useState("");
   const [query, setQuery] = useState("");
   const [deletingId, setDeletingId] = useState(null);
-  const [confirmId, setConfirmId] = useState(null);
   const [deleteError, setDeleteError] = useState("");
-  const [diseaseSortDir, setDiseaseSortDir] = useState(null); // null | "asc" | "desc"
 
   useEffect(() => {
     let cancelled = false;
@@ -45,14 +45,6 @@ export default function PatientRecordsPage() {
     };
   }, [auth?.token]);
 
-  function toggleDiseaseSort() {
-    setDiseaseSortDir((prev) => {
-      if (prev === null) return "asc";
-      if (prev === "asc") return "desc";
-      return null;
-    });
-  }
-
   const filteredPatients = useMemo(() => {
     let list = patients;
 
@@ -65,27 +57,22 @@ export default function PatientRecordsPage() {
       list = list.filter((p) => {
         const name = (p.full_name || "").toLowerCase();
         const familyNo = String(p.family_number ?? "").toLowerCase();
-        const disease = (p.disease_type || "").toLowerCase();
-        return name.includes(q) || familyNo.includes(q) || disease.includes(q);
-      });
-    }
-
-    if (diseaseSortDir) {
-      list = [...list].sort((a, b) => {
-        const da = (a.disease_type || "").toLowerCase();
-        const db = (b.disease_type || "").toLowerCase();
-        // Blank disease_type always sinks to the bottom regardless of direction
-        if (!da && !db) return 0;
-        if (!da) return 1;
-        if (!db) return -1;
-        return diseaseSortDir === "asc" ? da.localeCompare(db) : db.localeCompare(da);
+        return name.includes(q) || familyNo.includes(q);
       });
     }
 
     return list;
-  }, [patients, query, healthCenterFilter, diseaseSortDir]);
+  }, [patients, query, healthCenterFilter]);
 
-  async function handleDelete(patientId) {
+  async function handleDelete(patient) {
+    const patientId = patient.id;
+    const ok = await confirm({
+      title: `Delete the record of ${patient.full_name}?`,
+      message: "The patient record and the patient login will be removed. This cannot be undone.",
+      confirmText: "Yes, delete",
+      tone: "danger",
+    });
+    if (!ok) return;
     setDeleteError("");
     setDeletingId(patientId);
     try {
@@ -93,7 +80,6 @@ export default function PatientRecordsPage() {
         headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : {},
       });
       setPatients((prev) => prev.filter((p) => p.id !== patientId));
-      setConfirmId(null);
     } catch (err) {
       setDeleteError("Unable to delete this patient record right now.");
     } finally {
@@ -107,7 +93,7 @@ export default function PatientRecordsPage() {
         type="button"
         onClick={() => navigate(-1)}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#0B3D7A] hover:underline mb-4"
-        style={{ fontFamily: "'Lora', serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         <ArrowLeft size={16} />
         Back
@@ -115,10 +101,10 @@ export default function PatientRecordsPage() {
 
       <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl text-[#000000] font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patient Records
           </h2>
-          <p className="text-[#000000]" style={{ fontFamily: "'Lora', serif" }}>
+          <p className="text-[#000000]" style={{ fontFamily: "'Inter', sans-serif" }}>
             View full medical records, 
           </p>
         </div>
@@ -129,9 +115,9 @@ export default function PatientRecordsPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, family no., or disease"
+            placeholder="Search by name or family no."
             className="w-full rounded-full border border-[#1B5E20]/30 pl-11 pr-4 py-2.5 text-sm text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#0B3D7A]/40"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           />
         </div>
       </div>
@@ -140,7 +126,7 @@ export default function PatientRecordsPage() {
         <div className="mb-4 flex items-center gap-2">
           <span
             className="inline-flex items-center gap-2 rounded-full bg-[#0B3D7A]/10 text-[#0B3D7A] px-4 py-1.5 text-sm font-semibold"
-            style={{ fontFamily: "'Lora', serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             Filtered: {healthCenterName(healthCenterFilter)}
             <button
@@ -155,43 +141,32 @@ export default function PatientRecordsPage() {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-[#0B3D7A]/20">
-        <table className="w-full min-w-[720px] border-collapse text-left" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="overflow-x-auto rounded-2xl border border-[#E3E8EF] bg-white shadow-sm">
+        <table className="w-full min-w-[720px] border-collapse text-left" style={{ fontFamily: "'Inter', sans-serif" }}>
           <thead>
-            <tr className="bg-[#0B3D7A] text-white">
-              <th className="px-4 py-3 font-bold">Patient</th>
-              <th className="px-4 py-3 font-bold">Family No.</th>
-              <th className="px-4 py-3 font-bold">Health Center</th>
-              <th className="px-4 py-3 font-bold">Age</th>
-              <th className="px-4 py-3 font-bold">Sex</th>
-              <th className="px-4 py-3 font-bold">
-                <button
-                  type="button"
-                  onClick={toggleDiseaseSort}
-                  className="inline-flex items-center gap-1.5 hover:text-white/80 transition-colors"
-                  title="Click to sort by disease type"
-                >
-                  Type of Disease
-                  <ArrowUpDown size={13} />
-                </button>
-              </th>
-              <th className="px-4 py-3 font-bold text-right">Action</th>
+            <tr className="bg-[#F4F6F9] text-[#5B6470] text-xs uppercase tracking-wide">
+              <th className="px-4 py-3 font-semibold">Patient</th>
+              <th className="px-4 py-3 font-semibold">Family No.</th>
+              <th className="px-4 py-3 font-semibold">Health Center</th>
+              <th className="px-4 py-3 font-semibold">Age</th>
+              <th className="px-4 py-3 font-semibold">Sex</th>
+              <th className="px-4 py-3 font-semibold text-right">Action</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
-              <tr className="bg-[#1B5E20] text-white">
-                <td colSpan={7} className="px-4 py-6 text-center">Loading…</td>
+              <tr className="bg-white text-[#5B6470]">
+                <td colSpan={6} className="px-4 py-6 text-center">Loading…</td>
               </tr>
             )}
             {!isLoading && loadError && (
-              <tr className="bg-[#1B5E20] text-white">
-                <td colSpan={7} className="px-4 py-6 text-center">{loadError}</td>
+              <tr className="bg-white text-[#5B6470]">
+                <td colSpan={6} className="px-4 py-6 text-center">{loadError}</td>
               </tr>
             )}
             {!isLoading && !loadError && filteredPatients.length === 0 && (
-              <tr className="bg-[#1B5E20] text-white">
-                <td colSpan={7} className="px-4 py-6 text-center">
+              <tr className="bg-white text-[#5B6470]">
+                <td colSpan={6} className="px-4 py-6 text-center">
                   {patients.length === 0 ? "No patient records yet." : "No patients match your search."}
                 </td>
               </tr>
@@ -200,44 +175,23 @@ export default function PatientRecordsPage() {
               <tr
                 key={p.id}
                 onClick={() => navigate(`/dashboard/records/${p.id}`)}
-                className="bg-[#1B5E20] text-white border-t border-white/10 cursor-pointer hover:bg-[#164D1A] transition-colors"
+                className="bg-white text-[#1A1A1A] border-t border-[#E3E8EF] cursor-pointer hover:bg-[#F4F6F9] transition-colors"
               >
                 <td className="px-4 py-3">{p.full_name}</td>
                 <td className="px-4 py-3">{p.family_number || "—"}</td>
                 <td className="px-4 py-3">{healthCenterName(p.health_center_id)}</td>
                 <td className="px-4 py-3">{p.age}</td>
                 <td className="px-4 py-3">{p.sex}</td>
-                <td className="px-4 py-3">{p.disease_type || "—"}</td>
                 <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                  {confirmId === p.id ? (
-                    <div className="flex items-center justify-end gap-2">
-                      <span className="text-xs">Delete?</span>
-                      <button
-                        type="button"
-                        disabled={deletingId === p.id}
-                        onClick={() => handleDelete(p.id)}
-                        className="rounded-full bg-[#8A3B27] px-3 py-1 text-xs font-bold text-white hover:bg-[#6f2f1f] disabled:opacity-60"
-                      >
-                        {deletingId === p.id ? "Deleting…" : "Yes"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setConfirmId(null)}
-                        className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white hover:bg-white/30"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmId(p.id)}
-                      className="inline-flex items-center justify-center rounded-full p-2 text-white/80 hover:bg-white/20 hover:text-white transition-colors"
-                      title="Delete patient record"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(p)}
+                    disabled={deletingId === p.id}
+                    className="inline-flex items-center justify-center rounded-full p-2 text-[#5B6470] hover:bg-[#B3261E]/10 hover:text-[#B3261E] transition-colors"
+                    title="Delete patient record"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -246,13 +200,13 @@ export default function PatientRecordsPage() {
       </div>
 
       {deleteError && (
-        <p className="text-xs text-[#8A3B27] mt-3" style={{ fontFamily: "'Lora', serif" }}>
+        <p className="text-xs text-[#8A3B27] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
           {deleteError}
         </p>
       )}
 
-      <p className="text-xs text-[#5B6470] mt-3" style={{ fontFamily: "'Lora', serif" }}>
-        Click "Type of Disease" to sort — useful for grouping patients with the same condition together (e.g. all TB patients).
+      <p className="text-xs text-[#5B6470] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+        The diagnosis of each patient is only shown to the doctors.
       </p>
     </div>
   );

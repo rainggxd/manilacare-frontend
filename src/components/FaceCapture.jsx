@@ -1,7 +1,14 @@
 import { grabPhoto } from "../utils/photo";
 import { useEffect, useRef, useState } from "react";
-import { Camera } from "lucide-react";
-import { captureDescriptor, checkFrame, FRAME_HINTS, loadFaceModels } from "../utils/faceApi";
+import { Camera, ArrowLeft, ArrowRight, ScanFace, CheckCircle2 } from "lucide-react";
+import {
+  captureDescriptor,
+  checkFrame,
+  FRAME_HINTS,
+  LIVENESS_STEPS,
+  loadFaceModels,
+  runLivenessCheck,
+} from "../utils/faceApi";
 
 /**
  * Camera preview with a capture button.
@@ -14,8 +21,11 @@ import { captureDescriptor, checkFrame, FRAME_HINTS, loadFaceModels } from "../u
  *   samples     - how many good frames to average (default 3)
  *   buttonLabel - text on the button
  *   disabled    - disable the button from the outside
+ *   liveness    - ask the person to turn the head to the left and to the
+ *                 right first (like e-wallet apps), so a printed photo or a
+ *                 picture on a phone is not accepted (default true)
  */
-export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Capture Face", disabled = false }) {
+export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Capture Face", disabled = false, liveness = true }) {
   const videoRef = useRef(null);
   const capturingRef = useRef(false);
 
@@ -27,6 +37,7 @@ export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Ca
   const [hintOk, setHintOk] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureError, setCaptureError] = useState("");
+  const [live, setLive] = useState(null); // { index, step, hint } while the check runs
 
   // 1) Start the camera
   useEffect(() => {
@@ -112,6 +123,11 @@ export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Ca
     setIsCapturing(true);
     setCaptureError("");
     try {
+      if (liveness) {
+        setLive({ index: 0, step: LIVENESS_STEPS[0], hint: "" });
+        await runLivenessCheck(videoRef.current, setLive);
+        // The person is now looking straight: read the face right away
+      }
       const descriptor = await captureDescriptor(videoRef.current, samples);
       const photo = grabPhoto(videoRef.current);
       await onCaptured(descriptor, photo);
@@ -120,6 +136,7 @@ export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Ca
     } finally {
       capturingRef.current = false;
       setIsCapturing(false);
+      setLive(null);
     }
   }
 
@@ -132,26 +149,28 @@ export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Ca
         {/* mirrored so it feels like a mirror */}
         <video ref={videoRef} muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
 
+        {live && <LivenessOverlay live={live} />}
+
         {(problem || waiting) && (
           <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-            <p className="text-sm text-white/90" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-white/90" style={{ fontFamily: "'Inter', sans-serif" }}>
               {problem || (!cameraReady ? "Starting the camera…" : "Loading face models…")}
             </p>
           </div>
         )}
       </div>
 
-      {!problem && cameraReady && modelsReady && hint && (
+      {!problem && cameraReady && modelsReady && hint && !live && (
         <p
           className={`text-sm text-center mt-3 ${hintOk ? "text-[#1B5E20]" : "text-[#5B6470]"}`}
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           {hint}
         </p>
       )}
 
       {captureError && (
-        <p role="alert" className="text-sm text-center text-[#8A3B27] mt-3" style={{ fontFamily: "'Lora', serif" }}>
+        <p role="alert" className="text-sm text-center text-[#8A3B27] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
           {captureError}
         </p>
       )}
@@ -162,11 +181,64 @@ export default function FaceCapture({ onCaptured, samples = 3, buttonLabel = "Ca
           onClick={handleCapture}
           disabled={Boolean(problem) || !cameraReady || !modelsReady || isCapturing || disabled}
           className="inline-flex items-center gap-2 rounded-full bg-[#0B3D7A] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#0A3468] transition-colors disabled:opacity-60"
-          style={{ fontFamily: "'Lora', serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <Camera size={16} />
-          {isCapturing ? "Reading face…" : buttonLabel}
+          {isCapturing ? (live && live.index < LIVENESS_STEPS.length ? "Follow the steps on the camera…" : "Reading face…") : buttonLabel}
         </button>
+      </div>
+
+      {liveness && !problem && (
+        <p className="text-xs text-center text-[#5B6470] mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+          After pressing the button, follow the arrow: turn your head to the left, then to the right. This shows that it is
+          a real person and not a photo.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Steps and arrow shown on top of the camera while the liveness check runs. */
+function LivenessOverlay({ live }) {
+  const finished = live.index >= LIVENESS_STEPS.length;
+  const key = live.step?.key;
+
+  return (
+    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+      {/* step dots */}
+      <div className="flex justify-center gap-2 pt-3">
+        {LIVENESS_STEPS.map((s, i) => (
+          <span
+            key={s.key}
+            className={`h-2.5 rounded-full transition-all ${
+              i < live.index || finished ? "w-6 bg-[#4ADE80]" : i === live.index ? "w-8 bg-white" : "w-2.5 bg-white/40"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* big arrow in the middle */}
+      <div className="flex-1 flex items-center justify-between px-3">
+        <span className={`rounded-full bg-black/45 p-2 transition-opacity ${key === "left" && !finished ? "opacity-100 animate-pulse" : "opacity-0"}`}>
+          <ArrowLeft size={44} className="text-white" strokeWidth={3} />
+        </span>
+        {(key === "center" || key === "front" || finished) && (
+          <span className="rounded-full bg-black/35 p-3">
+            {finished ? <CheckCircle2 size={44} className="text-[#4ADE80]" /> : <ScanFace size={44} className="text-white" />}
+          </span>
+        )}
+        <span className={`rounded-full bg-black/45 p-2 transition-opacity ${key === "right" && !finished ? "opacity-100 animate-pulse" : "opacity-0"}`}>
+          <ArrowRight size={44} className="text-white" strokeWidth={3} />
+        </span>
+      </div>
+
+      {/* instruction */}
+      <div className="bg-gradient-to-t from-black/85 to-black/0 px-4 pt-8 pb-4 text-center" aria-live="polite">
+        <p className="text-lg font-bold text-white leading-snug">
+          {finished ? "Done! Reading the face…" : live.step?.title}
+        </p>
+        {!finished && <p className="text-sm text-white/85">{live.step?.tagalog}</p>}
+        {live.hint && !finished && <p className="text-sm font-semibold text-[#FDE68A] mt-1">{live.hint}</p>}
       </div>
     </div>
   );

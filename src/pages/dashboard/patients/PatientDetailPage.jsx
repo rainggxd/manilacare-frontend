@@ -3,7 +3,6 @@ import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import axios from "axios";
 import { healthCenterName } from "../../../utils/healthCenters";
-import FaceEnrollmentCard from "../../../components/FaceEnrollmentCard";
 import MedicalBackgroundCard from "../../../components/MedicalBackgroundCard";
 import CheckupHistoryCard from "../../../components/CheckupHistoryCard";
 import PatientPhoto from "../../../components/PatientPhoto";
@@ -62,18 +61,18 @@ export default function PatientDetailPage() {
         onClick={() => navigate("/dashboard/records")}
         aria-label="Back to Patient Records"
         className="mb-6 text-[#1B5E20] hover:text-[#0B3D7A] transition-colors flex items-center gap-1"
-        style={{ fontFamily: "'Lora', serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         <ChevronLeft size={20} />
         Back to Patient Records
       </button>
 
       {isLoading && (
-        <p className="text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+        <p className="text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
       )}
 
       {!isLoading && loadError && (
-        <div className="rounded-2xl border border-[#8A3B27]/30 bg-[#FBEAE5] text-[#8A3B27] px-5 py-4" style={{ fontFamily: "'Lora', serif" }}>
+        <div className="rounded-2xl border border-[#8A3B27]/30 bg-[#FBEAE5] text-[#8A3B27] px-5 py-4" style={{ fontFamily: "'Inter', sans-serif" }}>
           {loadError}
         </div>
       )}
@@ -86,14 +85,13 @@ export default function PatientDetailPage() {
               auth={auth}
               size={112}
               editable
+              canRemove
               onUpdated={(photo) => setPatient((prev) => ({ ...prev, photo }))}
             />
-            <h2 className="text-3xl font-bold text-[#1B5E20]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0B3D7A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {patient.full_name}
             </h2>
           </div>
-
-          <FaceEnrollmentCard patient={patient} auth={auth} canRemove />
 
           <Section title="Basic Information">
             <InfoField label="Age" value={patient.age} />
@@ -143,14 +141,14 @@ export default function PatientDetailPage() {
               <div className="col-span-2 overflow-x-auto -mt-2">
                 <table className="w-full min-w-[400px] border-collapse text-sm">
                   <thead>
-                    <tr className="text-white/70">
+                    <tr className="text-[#8A94A6]">
                       <th className="text-left font-normal pb-2 pr-4">Vaccine</th>
                       <th className="text-left font-normal pb-2">Date Given</th>
                     </tr>
                   </thead>
                   <tbody>
                     {patient.immunization_records.map((rec, i) => (
-                      <tr key={i} className="border-t border-white/10">
+                      <tr key={i} className="border-t border-[#E3E8EF] text-[#1A1A1A]">
                         <td className="py-2 pr-4">{rec.vaccine_name}</td>
                         <td className="py-2">{formatDate(rec.date_given)}</td>
                       </tr>
@@ -191,11 +189,11 @@ export default function PatientDetailPage() {
 
 function Section({ title, children }) {
   return (
-    <div className="rounded-2xl bg-[#1B5E20]/95 text-white p-6">
-      <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+    <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+      <h3 className="text-lg font-bold text-[#0B3D7A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
         {title}
       </h3>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm" style={{ fontFamily: "'Lora', serif" }}>
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
         {children}
       </dl>
     </div>
@@ -205,10 +203,10 @@ function Section({ title, children }) {
 function InfoField({ label, value, sub }) {
   return (
     <div>
-      <dt className="text-white/70">{label}</dt>
-      <dd>
+      <dt className="text-[#8A94A6] text-xs uppercase tracking-wide">{label}</dt>
+      <dd className="text-[#1A1A1A] font-semibold">
         {value || value === 0 ? value : "—"}
-        {sub && sub !== "—" ? <span className="text-white/70"> ({sub})</span> : null}
+        {sub && sub !== "—" ? <span className="text-[#5B6470] font-normal"> ({sub})</span> : null}
       </dd>
     </div>
   );

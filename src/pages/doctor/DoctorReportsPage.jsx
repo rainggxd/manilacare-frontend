@@ -8,7 +8,7 @@ function BarRow({ label, count, max }) {
   const pct = max > 0 ? Math.round((count / max) * 100) : 0;
   return (
     <div className="mb-3">
-      <div className="flex items-center justify-between text-sm mb-1" style={{ fontFamily: "'Lora', serif" }}>
+      <div className="flex items-center justify-between text-sm mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         <span className="text-[#1A1A1A] font-semibold">{label}</span>
         <span className="text-[#8A8578]">{count}</span>
       </div>
@@ -76,53 +76,53 @@ export default function DoctorReportsPage() {
 
   return (
     <div>
-      <h2 className="text-3xl text-[#1B5E20] font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-2xl sm:text-3xl text-[#0B3D7A] font-bold mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
         Reports
       </h2>
-      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Lora', serif" }}>
+      <p className="text-[#5B6470] mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
         Overview of patients in your health center
       </p>
 
       {isLoading ? (
-        <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>Loading…</p>
+        <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>Loading…</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-          <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 text-center">
-            <p className="text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 text-center">
+            <p className="text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {myPatients.length}
             </p>
-            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>Total Patients</p>
+            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>Total Patients</p>
           </div>
-          <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 text-center">
-            <p className="text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 text-center">
+            <p className="text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {diagnosedCount}
             </p>
-            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>Diagnosed</p>
+            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>Diagnosed</p>
           </div>
-          <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6 text-center">
-            <p className="text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6 text-center">
+            <p className="text-3xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {diseaseBreakdown.length}
             </p>
-            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Lora', serif" }}>Distinct Conditions</p>
+            <p className="text-sm text-[#5B6470]" style={{ fontFamily: "'Inter', sans-serif" }}>Distinct Conditions</p>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Patients by Sex
           </h3>
           <BarRow label="Male" count={sexBreakdown.Male} max={maxSex} />
           <BarRow label="Female" count={sexBreakdown.Female} max={maxSex} />
         </div>
 
-        <div className="rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="rounded-2xl bg-white border border-[#E3E8EF] shadow-sm p-6">
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Top Diagnoses
           </h3>
           {diseaseBreakdown.length === 0 ? (
-            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Lora', serif" }}>
+            <p className="text-sm text-[#8A8578]" style={{ fontFamily: "'Inter', sans-serif" }}>
               No diagnoses recorded yet.
             </p>
           ) : (
