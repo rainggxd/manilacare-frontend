@@ -71,8 +71,8 @@ export default function PortalLayout({ auth, onLogout, portalName, homePath, sec
       <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Main menu">
         {sections.map((section) => (
           <div key={section.heading} className="mb-5">
-            <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8A94A6]">{section.heading}</p>
-            <ul className="flex flex-col gap-0.5">
+            <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#8A94A6]">{section.heading}</p>
+            <ul className="flex flex-col gap-1">
               {section.items.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -82,20 +82,23 @@ export default function PortalLayout({ auth, onLogout, portalName, homePath, sec
                       end={item.to === homePath}
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        `group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D7A]/40 ${
+                        `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] transition-colors outline-none ${
                           isActive
-                            ? "bg-[#0B3D7A]/[0.08] text-[#0B3D7A] font-semibold"
-                            : "text-[#3D4653] hover:bg-[#F4F6F9] hover:text-[#0B3D7A]"
+                            ? "bg-[#0B3D7A] text-white font-semibold shadow-[0_6px_16px_-8px_rgba(11,61,122,0.7)]"
+                            : "text-[#3D4653] hover:bg-[#EEF4FB] hover:text-[#0B3D7A]"
                         }`
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <span
-                            className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${isActive ? "bg-[#0B3D7A]" : "bg-transparent"}`}
-                            aria-hidden="true"
-                          />
-                          {Icon && <Icon size={18} className={isActive ? "text-[#0B3D7A]" : "text-[#8A94A6] group-hover:text-[#0B3D7A]"} />}
+                          {Icon && (
+                            <Icon
+                              size={20}
+                              className={`shrink-0 transition-transform duration-200 ${
+                                isActive ? "text-white" : "text-[#8A94A6] group-hover:text-[#0B3D7A] group-hover:translate-x-0.5"
+                              }`}
+                            />
+                          )}
                           <span>{item.label}</span>
                         </>
                       )}
@@ -139,8 +142,8 @@ export default function PortalLayout({ auth, onLogout, portalName, homePath, sec
       {/* Sidebar: slide-in on small screens */}
       {menuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="w-72 max-w-[85%] h-full shadow-xl">{sidebar}</div>
-          <button type="button" className="flex-1 bg-black/40" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
+          <div className="w-72 max-w-[85%] h-full shadow-xl mc-pop">{sidebar}</div>
+          <button type="button" className="flex-1 bg-black/40 mc-fade" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
         </div>
       )}
 
@@ -167,7 +170,8 @@ export default function PortalLayout({ auth, onLogout, portalName, homePath, sec
         </header>
 
         <main className="flex-1 px-4 sm:px-8 py-6 sm:py-8">
-          <div className="max-w-7xl mx-auto">
+          {/* key = page address, so each page fades in when it opens */}
+          <div key={location.pathname} className="max-w-7xl mx-auto mc-page">
             <Outlet context={{ auth }} />
           </div>
         </main>

@@ -146,10 +146,10 @@ function PostCard({ post, onOpen }) {
   const style = categoryStyle(post.category);
   const Icon = style.icon;
   return (
-    <article className="h-full flex flex-col rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm overflow-hidden">
+    <article className="group h-full flex flex-col rounded-2xl bg-white border border-[#0B3D7A]/10 shadow-sm overflow-hidden hover:-translate-y-1 hover:border-[#0B3D7A]/25">
       {post.image ? (
-        <button type="button" onClick={onOpen} className="block" aria-label={`Open ${post.title}`}>
-          <img src={post.image} alt="" className="w-full h-44 sm:h-48 object-cover" loading="lazy" />
+        <button type="button" onClick={onOpen} className="block overflow-hidden" aria-label={`Open ${post.title}`}>
+          <img src={post.image} alt="" className="w-full h-44 sm:h-48 object-cover transition-transform duration-500 group-hover:scale-[1.04]" loading="lazy" />
         </button>
       ) : (
         <button

@@ -97,6 +97,7 @@ export default function DashboardPage() {
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -107,15 +108,18 @@ export default function DashboardPage() {
       setIsLoading(true);
       setLoadError("");
       try {
-        const [patientsRes, apptRes, usersRes] = await Promise.all([
+        const [patientsRes, apptRes, usersRes, visitsRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/patients`, { headers: authHeader }),
           axios.get(`${API_BASE_URL}/appointments`, { headers: authHeader }),
           axios.get(`${API_BASE_URL}/users`, { headers: authHeader }),
+          // check-ins (QR scan, face scan or manual) — if this fails the other numbers still show
+          axios.get(`${API_BASE_URL}/visits`, { headers: authHeader }).catch(() => ({ data: { data: [] } })),
         ]);
         if (!cancelled) {
           setPatients(patientsRes.data?.data ?? []);
           setAppointments(apptRes.data?.data ?? []);
           setUsers(usersRes.data?.data ?? []);
+          setVisits(visitsRes.data?.data ?? []);
         }
       } catch (err) {
         if (!cancelled) setLoadError("Unable to load dashboard data right now.");
@@ -146,8 +150,10 @@ export default function DashboardPage() {
       (p) => p.created_at && new Date(p.created_at).toDateString() === todayStr
     ).length;
 
-    return { total, availableDoctors, appointmentsToday, registeredToday, todayISO };
-  }, [patients, appointments, users]);
+    const checkedInToday = visits.filter((v) => toLocalISO(v.visit_date) === todayISO).length;
+
+    return { total, availableDoctors, appointmentsToday, registeredToday, checkedInToday, todayISO };
+  }, [patients, appointments, users, visits]);
 
   const recentPatients = useMemo(() => {
     return [...patients]
@@ -197,7 +203,7 @@ export default function DashboardPage() {
         <StatCard icon={Users} label="Total Patients" value={isLoading ? "…" : stats.total} />
         <StatCard icon={Stethoscope} label="Available Doctors" value={isLoading ? "…" : stats.availableDoctors} />
         <StatCard icon={CalendarCheck} label="Appointments Made Today" value={isLoading ? "…" : stats.appointmentsToday} />
-        <StatCard icon={QrCode} label="QR Scans Made Today" value="—" note="Coming soon — QR feature not built yet" />
+        <StatCard icon={QrCode} label="Patients Checked In Today" value={isLoading ? "…" : stats.checkedInToday} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">

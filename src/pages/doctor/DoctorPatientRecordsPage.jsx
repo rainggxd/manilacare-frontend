@@ -137,7 +137,7 @@ export default function DoctorPatientRecordsPage() {
       </div>
 
       <p className="text-xs text-[#5B6470] mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-        View-only — patient editing and diagnosis input coming next.
+        Click a patient to see their check-ups, vital signs, lab results and prescriptions.
       </p>
     </div>
   );

@@ -6,4 +6,224 @@ html,
 body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* =====================================================================
+   ManilaCare look and feel
+   Simple, calm and easy to use, especially for senior users:
+   - Every button and link reacts when pointed at, so people know it can be clicked.
+   - A clear, thick outline shows where you are when using the keyboard.
+   - Movements are small and quick. Nothing flashes or moves around a lot.
+   - People who turn on "reduce motion" on their device get no animation at all.
+   ===================================================================== */
+
+:root {
+  --mc-navy: #0b3d7a;
+  --mc-green: #1b5e20;
+  --mc-focus: #f2b705; /* gold: easy to see on both white and dark blue */
+  --mc-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Highlighted text */
+::selection {
+  background: #cfe0f5;
+  color: #0b3d7a;
+}
+
+/* ---------- Smooth, short transitions on everything you can click ---------- */
+:where(a, button, [role="button"], [role="option"], input, select, textarea, label[for], summary) {
+  transition:
+    background-color 0.18s var(--mc-ease),
+    border-color 0.18s var(--mc-ease),
+    color 0.18s var(--mc-ease),
+    box-shadow 0.2s var(--mc-ease),
+    transform 0.15s var(--mc-ease),
+    opacity 0.18s var(--mc-ease);
+}
+
+/* ---------- Clear keyboard focus (very visible for low-vision users) ---------- */
+:where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--mc-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Buttons ---------- */
+/* Pointer cursor for anything clickable */
+:where(button, [role="button"], label[for], summary):not(:disabled) {
+  cursor: pointer;
+}
+
+/* Filled buttons (rounded "pill" or rounded-lg with a background colour):
+   lift a little on hover, press down on click. */
+:where(button, a)[class*="rounded-full"][class*="bg-["]:not(:disabled):hover,
+:where(button, a)[class*="rounded-lg"][class*="bg-["]:not(:disabled):hover,
+label[for][class*="rounded-full"][class*="bg-["]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -6px rgba(11, 61, 122, 0.45);
+}
+
+:where(button, a, label[for]):not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+}
+
+/* Disabled buttons look disabled and do not move */
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Outline (white) pill buttons get a soft tint on hover */
+button[class*="rounded-full"][class*="border"]:not([class*="bg-["]):not(:disabled):hover {
+  box-shadow: 0 4px 12px -6px rgba(11, 61, 122, 0.35);
+}
+
+/* ---------- Form fields ---------- */
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]), select, textarea):not(:disabled):hover {
+  border-color: #94a8c4;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):focus {
+  box-shadow: 0 0 0 4px rgba(11, 61, 122, 0.12);
+}
+
+/* Bigger, easier-to-click checkboxes and radio buttons */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--mc-navy);
+  cursor: pointer;
+}
+
+/* Placeholder text dark enough to read */
+::placeholder {
+  color: #8a94a6;
+  opacity: 1;
+}
+
+/* ---------- Cards ---------- */
+/* White cards get a gentle shadow when pointed at */
+:where(div, section, article, a)[class*="rounded-2xl"][class*="shadow-sm"] {
+  transition: box-shadow 0.25s var(--mc-ease), border-color 0.25s var(--mc-ease), transform 0.2s var(--mc-ease);
+}
+
+:where(div, section, article)[class*="rounded-2xl"][class*="shadow-sm"]:hover {
+  box-shadow: 0 10px 28px -16px rgba(11, 61, 122, 0.28);
+}
+
+/* Cards that are links (dashboard shortcuts, landing page quick links) lift up a little */
+a[class*="rounded-2xl"]:hover,
+a[class*="rounded-xl"][class*="border"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -16px rgba(11, 61, 122, 0.4);
+}
+
+/* ---------- Tables ---------- */
+/* The row under the mouse is highlighted, so long rows are easy to follow */
+tbody tr {
+  transition: background-color 0.15s var(--mc-ease);
+}
+
+tbody tr:hover {
+  background-color: #eef4fb !important;
+}
+
+/* ---------- Page enter animation ---------- */
+/* Each page fades in softly when it opens */
+@keyframes mc-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mc-page {
+  animation: mc-page-in 0.28s var(--mc-ease) both;
+}
+
+/* Pop-up windows (dialogs) open with a small zoom */
+@keyframes mc-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mc-pop {
+  animation: mc-pop-in 0.2s var(--mc-ease) both;
+}
+
+@keyframes mc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mc-fade {
+  animation: mc-fade-in 0.2s ease-out both;
+}
+
+/* Every pop-up window (dark background that covers the page) fades in,
+   and the window itself opens with a small zoom. */
+.fixed.inset-0[class*="bg-black"] {
+  animation: mc-fade-in 0.18s ease-out both;
+}
+
+.fixed.inset-0[class*="bg-black"] > :first-child {
+  animation: mc-pop-in 0.22s var(--mc-ease) both;
+}
+
+/* ---------- Scrollbars (thin and calm, but still easy to grab) ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #b8c4d4 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #c5cfdc;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #94a8c4;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ---------- Respect "reduce motion" on the user's device ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  :where(button, a, label[for]):hover {
+    transform: none !important;
+  }
 }
