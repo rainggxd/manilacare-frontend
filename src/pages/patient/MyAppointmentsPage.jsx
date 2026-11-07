@@ -121,6 +121,7 @@ export default function MyAppointmentsPage() {
             <label className="block text-xs text-[#5B6470] mb-1">Date</label>
             <input
               type="date"
+              min={new Date().toLocaleDateString("en-CA")} /* past days cannot be picked */
               value={form.appointment_date}
               onChange={(e) => setForm((p) => ({ ...p, appointment_date: e.target.value }))}
               className="w-full rounded-full bg-[#F7F5F1] border border-[#0B3D7A]/15 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0B3D7A]/30"

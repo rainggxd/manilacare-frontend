@@ -5,7 +5,14 @@
 // (public/models), so no internet is needed. Only 128 numbers per face are
 // sent to the server, never a photo.
 
-import * as faceapi from "@vladmandic/face-api";
+// face-api.js is big (about 2 MB), so it is only downloaded the first time a
+// camera page needs it. The landing page and the login page open faster,
+// especially on a phone.
+let faceapi = null;
+async function lib() {
+  if (!faceapi) faceapi = await import("@vladmandic/face-api");
+  return faceapi;
+}
 
 const MODEL_URL = "/models";
 
@@ -15,6 +22,7 @@ let modelsPromise = null;
 export function loadFaceModels() {
   if (!modelsPromise) {
     modelsPromise = (async () => {
+      await lib();
       // Use the graphics card when possible, otherwise fall back to the CPU.
       const hasWebgl = await faceapi.tf.setBackend("webgl").catch(() => false);
       if (!hasWebgl) await faceapi.tf.setBackend("cpu");
@@ -46,6 +54,7 @@ const MIN_FACE_RATIO = 0.2;
  * 128-number descriptor.
  */
 export async function checkFrame(video, withDescriptor = false) {
+  await lib();
   const minWidth = (video.videoWidth || 640) * MIN_FACE_RATIO;
 
   if (!withDescriptor) {
@@ -140,6 +149,7 @@ function eyeAspectRatio(eye) {
  *          (0.5 = looking straight, lower or higher = head turned)
  */
 export async function readLiveFrame(video) {
+  await lib();
   const faces = await faceapi.detectAllFaces(video, LIVE_OPTIONS()).withFaceLandmarks();
   if (faces.length === 0) return { status: "none" };
   if (faces.length > 1) return { status: "multiple" };

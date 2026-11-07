@@ -213,6 +213,12 @@ export default function CheckInPage() {
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     {p.full_name}
+                    {/* Extra details so two patients with the same name can be told apart */}
+                    <span className="block text-xs font-normal text-[#5B6470]">
+                      {[p.family_number && `Family No. ${p.family_number}`, p.age && `${p.age} yrs`, p.sex, p.contact_number]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
                   </button>
                 ))
               )}
